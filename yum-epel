@@ -7,14 +7,17 @@ RHVER="`cat /etc/redhat-release`"
 
 VERSION=""
 [ "$RHVER" = "CentOS release 6.3 (Final)" ] && VERSION="6"
+[ "$RHVER" = "CentOS release 5.7 (Final)" ] && VERSION="5"
 
 [ -z "$VERSION" ] && echo "ERROR: version not implemented in script - please fix:" && echo $RHVER && exit
 
 RPM=""
 [ "$VERSION" = "6" ] && RPM="epel-release-6-8.noarch.rpm"
+[ "$VERSION" = "5" ] && RPM="epel-release-5-4.noarch.rpm"
 
 PLATFORM="`uname -m`"
 [ "$PLATFORM" = "i686" ] && PLATFORM="x86_64"
+[ "$PLATFORM" = "i586" ] && PLATFORM="i386"
 
 EPEL="http://dl.fedoraproject.org/pub/epel"
 
