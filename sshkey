@@ -1,0 +1,14 @@
+#/bin/sh
+# install key on remote server for no-password login
+
+SERVER="$1"
+[ -z "$SERVER" ] && echo -n "Enter server or user@server: " && read SERVER
+USER="${SERVER%@*}"
+SERVER="${SERVER#*@}"
+[ -z "$USER" ] && USER=`whoami`
+
+# generate our local key
+[ ! -f ~/.ssh/id_dsa.pub ] && ssh-keygen -t dsa -P '' -f ~/.ssh/id_dsa.pub
+
+echo "Installing ssh key on $USER@$SERVER"
+ssh $USER@$SERVER "mkdir -p ~/.ssh;cat >>~/.ssh/authorized_keys2; chmod 644 ~/.ssh/authorized_keys2" <~/.ssh/id_dsa.pub
