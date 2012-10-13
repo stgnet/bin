@@ -1,0 +1,27 @@
+#!/bin/sh
+# fix broken dns resolver by adding public DNS servers
+
+[ "$1" = "install" ] && echo "* * * * * root $0 check" >>/etc/crontab && exit
+
+[ "$1" = "uninstall" ] && sed -i "/$0/d" /etc/crontab && exit
+
+[ ! -z "$1" -a "$1" != "check" ] && echo "use: $0 install/uninstall" && exit
+
+#arraytest[0]='test' || echo "arrays not supported" && exit
+
+DNS=(
+	'4.2.2.4'
+	'8.8.8.8'
+	'208.67.222.222'
+)
+
+# uncomment this to force these nameservers instead of just adding
+# sed -i '/nameserver/d' /etc/resolv.conf
+
+for SERVER in ${DNS[*]}
+do
+	if [ -z "`fgrep $SERVER /etc/resolv.conf`" ]
+	then
+		echo "nameserver $SERVER" >>/etc/resolv.conf
+	fi
+done

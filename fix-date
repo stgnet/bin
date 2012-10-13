@@ -1,0 +1,8 @@
+#!/bin/sh
+# force a time update from network (useful for vm machines that drift)
+
+service ntpd stop
+sleep 5
+killall ntpd 2>/dev/null
+ntpdate -b 0.pool.ntp.org 1.pool.ntp.org 2.pool.ntp.org
+service ntpd start
