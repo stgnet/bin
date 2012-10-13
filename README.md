@@ -14,8 +14,9 @@ Requirements
 ------------
 
 * a RedHat style system with yum (this could be made flexible later)
-* bash
-* root user access
+* bash (well, yeah)
+* sed (used for mangling config files)
+* root user access (some can be used from user account - like sshkey)
 
 Installation
 ------------
@@ -23,8 +24,8 @@ Installation
 To install these utilities, log in (or su) as root, insure you are in /root,
 and git clone this project like this:
 
- cd /root
- git clone http://github.com/stgnet/bin
+	cd /root
+	git clone http://github.com/stgnet/bin
 
 
 Then just run the scripts present in the directory as
@@ -46,6 +47,6 @@ LICENSE
 Public Domain
 
 * Please share, fork, and contribute improvements
-* If you don't like this, let me know why: scott@griepentrog.com
+* If you don't like this, let me know why: scott@griepentrog.com or @stgnet
 * If you like this, please buy me a beer: [GitTip](https://www.gittip.com/stgnet/)
 
