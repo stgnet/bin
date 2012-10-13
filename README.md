@@ -26,12 +26,12 @@ and git clone this project like this:
 
 	cd /root
 	git clone http://github.com/stgnet/bin
+	chmod +x bin/*
 
 
-Then just run the scripts present in the directory as
-needed.  It may also be necessary to chmod +x /root/bin/*.  If you
-get an error that the script is not found, you didn't su - and/or
-/root/bin isn't in your $PATH - repeat the su - to fix.
+Then just run the scripts present in the directory as needed.  If you get an
+error that the script is not found, you didn't login as root and/or
+/root/bin isn't in your $PATH - repeat the `su -` to fix.
 
 Scripts
 -------
@@ -39,7 +39,7 @@ Scripts
 * fix-resolv - add public dns servers  to /etc/resolv.conf to fix errors
 		This can also be installed in crontab to patch after change
 * fix-date - force an immediate ntpd resync to pool.ntp.org
-
+* ssh-key - install key on remote system for no-prompt ssh/scp/rsync access
 
 LICENSE
 -------
@@ -48,5 +48,5 @@ Public Domain
 
 * Please share, fork, and contribute improvements
 * If you don't like this, let me know why: scott@griepentrog.com or @stgnet
-* If you like this, please buy me a beer: [GitTip](https://www.gittip.com/stgnet/)
+* If you like this, please buy me a beer: [GitTip](https://www.gittip.com/stgnet/) or paypal@griepentrog.com
 
