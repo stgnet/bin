@@ -1,0 +1,109 @@
+#!/bin/sh
+# auto create virtual config for apache from domains in webroot
+
+# to use:
+#  - # mkdir /var/www/foobar.com
+#  - # echo "Hello World" >/var/www/foobar.com/index.html
+#  - # webconf
+#  - the virtual conf to support foobar.com is built and apache reloaded
+#  - Insure foobar.com A record points to IP of the server
+#  - Access foobar.com with web browser
+#  - ...
+#  - Profit
+
+# Special triggers:
+# /var/www/foobar.pass - htpasswd style htdigest authentication
+# /var/www/foobar.allow - list of IP addresses one per line, bypass pw auth
+# /var/www/foobar.options - add "indexes" to allow auto indexes, etc
+
+WEBROOT="/var/www"
+DEFAULT="/var/www/html"
+CONFDIR="/etc/httpd/conf.d"
+
+[ ! -f /usr/sbin/httpd ] && yum -y install httpd
+[ ! -f /usr/bin/php ] && yum -y install php
+
+[ ! -d "$WEBROOT" ] && echo ERROR: $WEBROOT not found && exit
+[ ! -d "$DEFAULT" ] && echo ERROR: $DEFAULT not found && exit
+[ ! -d "$CONFDIR" ] && echo ERROR: $CONFDIR not found && exit
+
+cd $WEBROOT
+
+# purely convenience mechanism (/www/domain.com = www.domain.com)
+[ ! -h /www ] && ln -s $CONFDIR /www
+
+cat <<---- >$CONFDIR/virtual.conf
+#
+# Created by webconf (http://github.com/stgnet/bin)
+# Do not edit
+#
+# Default ($DEFAULT)
+NameVirtualHost *:80
+NameVirtualHost *:443
+<VirtualHost *:80 *:443>
+	ServerAdmin root@$HOSTNAME
+	DocumentRoot $DEFAULT
+	ServerName *
+</VirtualHost>
+---
+
+ls -1 |while read DOMAIN
+do
+	expr index "$DOMAIN" "." || continue
+	[ ! -d "$DOMAIN" ] && continue
+	DOCROOT="$PWD/$DOMAIN"
+	[ -h "$DOCROOT" ] && DOCROOT="`readlink -f $DOCROOT`"
+	[ ! -d "$DOCROOT" ] && continue
+
+	echo "Creating virtual config for $DOMAIN => $DOCROOT"
+
+	DIRECTORY=""
+	if [ -f "$WEBROOT/$DOMAIN.pass" ]
+	then
+		if [ -f "$WEBROOT/$DOMAIN.allow" ]
+		then
+			cat $WEBROOT/$DOMAIN.allow | while read ALLOW
+			do
+				DIRECTORY="$DIRECTORY	Allow from $ALLOW
+"
+			done
+		fi
+
+		DIRECTORY="$DIRECTORY	AuthType Basic
+	AuthName \"Restricted Area\"
+	AuthUserFile $WEBROOT/$DOMAIN.pass
+	Require valid-user
+	Satisfy any
+"
+	fi
+		
+
+	[ -f $WEBROOT/$DOMAIN.options ] && DIRECTORY="$DIRECTORY	Options `cat $WEBROOT/$DOMAIN.options`
+"
+
+	cat <<---- >>$CONFDIR/virtual.conf
+#
+# $DOMAIN => $DOCROOT
+#
+<VirtualHost *:80 *:443>
+	ServerName ${DOMAIN%%.*}
+	Redirect 301 / http://$DOMAIN
+</VirtualHost>
+<VirtualHost *:80 *:443>
+	ServerAdmin webmaster@$HOSTNAME
+	DocumentRoot $DOCROOT
+	ServerName $DOMAIN
+	ServerAlias www.$DOMAIN
+	<Directory $DOCROOT>
+		Order deny,allow
+		Allow from all
+$DIRECTORY
+	</Directory>
+</VirtualHost>
+
+---
+	
+done
+
+service httpd restart
+

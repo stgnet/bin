@@ -26,8 +26,6 @@ and git clone this project like this:
 
 	cd /root
 	git clone http://github.com/stgnet/bin
-	chmod +x bin/*
-
 
 Then just run the scripts present in the directory as needed.  If you get an
 error that the script is not found, you didn't login as root and/or
@@ -39,7 +37,8 @@ Scripts
 * fix-resolv - add public dns servers  to /etc/resolv.conf to fix errors
 		This can also be installed in crontab to patch after change
 * fix-date - force an immediate ntpd resync to pool.ntp.org
-* ssh-key - install key on remote system for no-prompt ssh/scp/rsync access
+* sshkey - install key on remote system for no-prompt ssh/scp/rsync access
+* webconf - auto build apache virtual.conf from /var/www/domain.com directories
 
 LICENSE
 -------
