@@ -30,7 +30,7 @@ CONFDIR="/etc/httpd/conf.d"
 cd $WEBROOT
 
 # purely convenience mechanism (/www/domain.com = www.domain.com)
-[ ! -h /www ] && ln -s $CONFDIR /www
+[ ! -h /www ] && ln -s $WEBROOT /www
 
 cat <<---- >$CONFDIR/virtual.conf
 #
@@ -49,7 +49,7 @@ NameVirtualHost *:443
 
 ls -1 |while read DOMAIN
 do
-	expr index "$DOMAIN" "." || continue
+	expr index "$DOMAIN" "." >/dev/null || continue
 	[ ! -d "$DOMAIN" ] && continue
 	DOCROOT="$PWD/$DOMAIN"
 	[ -h "$DOCROOT" ] && DOCROOT="`readlink -f $DOCROOT`"
