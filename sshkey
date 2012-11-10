@@ -9,7 +9,10 @@ SERVER="${SERVER#*@}"
 [ -z "$USER" ] && USER=`whoami`
 
 # generate our local key
-[ ! -f ~/.ssh/id_dsa.pub ] && ssh-keygen -t dsa -P '' -f ~/.ssh/id_dsa.pub
+[ ! -d ~/.ssh ] && mkdir -p ~/.ssh
+[ ! -f ~/.ssh/id_dsa.pub ] && ssh-keygen -t dsa -P '' -f ~/.ssh/id_dsa
 
-echo "Installing ssh key on $USER@$SERVER"
-ssh $USER@$SERVER "mkdir -p ~/.ssh;cat >>~/.ssh/authorized_keys2; chmod 644 ~/.ssh/authorized_keys2" <~/.ssh/id_dsa.pub
+IAM="`whoami`@$HOSTNAME"
+
+echo "Installing ssh key for $IAM on $USER@$SERVER"
+ssh $USER@$SERVER "mkdir -p ~/.ssh;[ -f ~/.ssh/authorized_keys ] && sed -i "/$IAM/d" ~/.ssh/authorized_keys;cat >>~/.ssh/authorized_keys; chmod 644 ~/.ssh/authorized_keys" <~/.ssh/id_dsa.pub
