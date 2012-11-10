@@ -6,7 +6,6 @@ SERVER="$1"
 USER="${SERVER%@*}"
 [ "$USER" = "$SERVER" ] && USER="root"
 SERVER="${SERVER#*@}"
-echo "USER=$USER SERVER=$SERVER"
 [ -z "$USER" ] && USER=`whoami`
 
 # generate our local key
