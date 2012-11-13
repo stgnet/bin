@@ -4,6 +4,7 @@
 SERVER="$1"
 [ -z "$SERVER" ] && echo -n "Enter server or user@server: " && read SERVER
 USER="${SERVER%@*}"
+[ "$USER" = "$SERVER" ] && USER="root"
 SERVER="${SERVER#*@}"
 [ -z "$USER" ] && USER=`whoami`
 
