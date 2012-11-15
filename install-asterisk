@@ -1,0 +1,14 @@
+#!/bin/sh
+
+[ ! -f /etc/redhat-release ] && echo ERROR: Not RedHat or CentOS && exit
+
+cd /etc/yum.repos.d
+
+FILE="centos-asterisk-1.8.repo"
+URL="http://packages.asterisk.org/rhel/$FILE"
+
+[ ! -f "$FILE" ] && wget "$URL"
+
+[ -z `fgrep 'enabled=1' $FILE` ] && sed -i 's/enabled=0/enabled=1/' $FILE
+
+yum install asterisk asterisk-configs

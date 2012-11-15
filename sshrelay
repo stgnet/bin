@@ -1,0 +1,38 @@
+#!/bin/sh
+
+echo "Not completed"
+exit
+
+# ssh -L$LOCALPORT:$REMOTEHOST:$SSHPORT $PROXYHOST
+# 
+# $PROXYHOST: the machine you've got SSH access to
+# $REMOTEHOST: the machine that $PROXYHOST can connect to, but you can't. 
+# Use a hostname or IP that $PROXYHOST can use to refer to the machine
+# $SSHPORT: the port that sshd is listening for on remotehost; most likely 22
+# $LOCALPORT: the local outbound port SSH is opening up on your local machine
+# that forwards to port 22 on $REMOTEHOST
+# 
+# Leave that connection up to keep the tunnel working. You might want to also
+# add -N to the command so that this connection won't bring up a remote shell
+# and you won't accidentally close it later.
+#
+# make the tunneled port available remotely by using the -g option
+
+# Create a new entry in your ~/.ssh/config that will be used to initiate the
+# tunnel. Set the Host entry to an uncommon name so that you will also be able
+# to login to the relay computer normally. It will establish a connection from
+# port 11111 on the loopback interface on the relay computer to the ssh port on
+# the loopback interface on the server.
+
+# Host relay
+# HostName relay.hostname.com
+# RemoteForward 11111 localhost:22
+# IdentityFile  ~/.ssh/tunnel-id
+
+# while true; do
+#    /usr/bin/ssh relay
+#    sleep 1
+# done < /dev/null & disown
+
+RELAYHOST="relay.stg.net"
+

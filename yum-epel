@@ -1,0 +1,22 @@
+#!/bin/sh
+# Install EPEL for this version
+
+[ ! -f /etc/redhat-release ] && echo "ERROR: not a RedHat/Fedora/CentOS system" && exit
+
+RHVER="`cat /etc/redhat-release`"
+
+VERSION=""
+[ "$RHVER" = "CentOS release 6.3 (Final)" ] && VERSION="6"
+
+[ -z "$VERSION" ] && echo "ERROR: version not implemented in script - please fix:" && echo $RHVER && exit
+
+RPM=""
+[ "$VERSION" = "6" ] && RPM="epel-release-6-7.noarch.rpm"
+
+PLATFORM="`uname -m`"
+[ "$PLATFORM" = "i686" ] && PLATFORM="x86_64"
+
+EPEL="http://dl.fedoraproject.org/pub/epel"
+
+rpm -Uvh $EPEL/$VERSION/$PLATFORM/$RPM
+

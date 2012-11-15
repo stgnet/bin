@@ -1,0 +1,7 @@
+#!/bin/sh
+
+yum -y install php-pear php-xml
+
+pear config-set auto_discover 1
+pear channel-discover pear.phpunit.de
+pear install -a phpunit/PHPUnit
