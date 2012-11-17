@@ -1,0 +1,278 @@
+#/bin/sh
+
+arraytest[0]='test' || (echo 'ERROR: arrays not supported by bash version'; exit 0)
+
+VERLIST=(
+    'http://downloads.sourceforge.net/project/sugarcrm/1%20-%20SugarCRM%206.5.X/SugarCommunityEdition-6.5.X/SugarCE-6.5.7.zip'
+	'http://downloads.sourceforge.net/project/sugarcrm/1%20-%20SugarCRM%206.5.X/SugarCommunityEdition-6.5.X/SugarCE-6.5.6.zip'
+	'http://downloads.sourceforge.net/project/sugarcrm/1%20-%20SugarCRM%206.5.0/SugarCommunityEdition-6.5.0/SugarCE-6.5.0.zip'
+	'http://sourceforge.net/projects/sugarcrm/files/2%20-%20SugarCRM%206.4.0/SugarCommunityEdition-6.4.0/SugarCE-6.4.5.zip'
+	'http://downloads.sourceforge.net/project/sugarcrm/2%20-%20SugarCRM%206.4.0/SugarCommunityEdition-6.4.0/SugarCE-6.4.4.zip'
+	'http://sourceforge.net/projects/sugarcrm/files/3%20-%20SugarCRM%206.3.0/SugarCommunityEdition-6.3.0/SugarCE-6.3.3.zip'
+	'http://sourceforge.net/projects/sugarcrm/files/4%20-%20SugarCRM%206.2.0/SugarCommunityEdition-6.2.0/SugarCE-6.2.6.zip'
+	'http://sourceforge.net/projects/sugarcrm/files/SugarCRM%206.1.0/SugarCommunityEdition-6.1.0/SugarCE-6.1.8.zip'
+	'http://sourceforge.net/projects/sugarcrm/files/SugarCRM%206.0%20GA/SugarCommunityEdition-6.0.4/SugarCE-6.0.4.zip'
+	'http://sourceforge.net/projects/sugarcrm/files/SugarCRM%205.5.4/SugarCommunityEdition-5.5.4/SugarCE-5.5.4.zip'
+)
+
+echo "SugarCRM Installation Tool"
+echo ""
+COUNT=1
+
+for DL in ${VERLIST[*]}
+do
+	FILE="${DL##*/}"
+	echo "$COUNT: ${FILE%.*}"
+	COUNT=`expr $COUNT + 1`
+done
+
+echo ""
+echo -n "Select version to install [1]: "
+read VER
+
+if [ -z "$VER" ]
+then
+	VER="1"
+fi
+
+VER=`expr $VER - 1`
+
+DOWNLOAD="${VERLIST[$VER]}"
+
+if [ -z "$DOWNLOAD" ]
+then
+	echo "ERROR: Invalid selection"
+	set
+	exit 1
+fi
+
+FILE="${DOWNLOAD##*/}"
+LEFT="${FILE%-*}"
+RIGHT="${FILE#*-}"
+
+DLPATH="$LEFT-Full-${RIGHT%.*}"
+#echo "DLPATH=$DLPATH"
+
+#DLPATH="SugarCE-Full-6.4.4"
+
+
+SUGAR="sugar"
+if [ ! -z "$1" ]
+then
+	SUGAR="$1"
+fi
+
+#JUSTHOST="${HOSTNAME%%.*}"
+#SUGARDNS="$SUGAR.$JUSTHOST"
+
+SUGARHOST="$SUGAR.$HOSTNAME"
+SUGARPATH="/var/www/$SUGARHOST"
+
+SUGARDB="$SUGAR"
+
+while [ 1 ]
+do
+	echo ""
+	echo -n "Enter hostname for sugar installation [$SUGARHOST]: "
+	read VALUE
+	if [ ! -z "$VALUE" ]
+	then
+		SUGARHOST="$VALUE"
+	fi
+	SUGARPATH="/var/www/$SUGARHOST"
+	if [ -d "$SUGARPATH" ]
+	then
+		echo "ERROR: That domain is already in use"
+		continue
+	fi
+	break
+done
+
+while [ 1 ]
+do
+	echo ""
+	echo -n "Enter mysql database for this installation [$SUGARDB]: "
+	read VALUE
+	if [ ! -z "$VALUE" ]
+	then
+		SUGARDB="$VALUE"
+	fi
+	if [ -d "/var/lib/mysql/$SUGARDB" ]
+	then
+		echo "ERROR: That database already exists"
+		continue
+	fi
+	break
+done
+
+DEMODATA="0"
+
+echo ""
+echo -n "Install demo data?  0=No, 1=Yes [0]: "
+read VALUE
+if [ ! -z "$VALUE" ]
+then
+	DEMODATA="$VALUE"
+fi
+
+echo ""
+echo "Installing $DLPATH to $SUGARPATH with database $SUGARDB"
+echo ""
+
+OWNER="asterisk"
+if [ -z "`grep ^$OWNER /etc/passwd`" ]
+then
+	OWNER="apache"
+	if [ -z "`grep ^$OWNER /etc/passwd`" ]
+	then
+		echo "ERROR: cant find httpd owner"
+		exit 1
+	fi
+fi
+
+#if [ "$JUSTHOST" = "$HOSTNAME" ]
+#then
+#	echo "ERROR: hostname missing domain"
+#	exit 1
+#fi
+
+
+
+if [ -d "$SUGARPATH" ]
+then
+	echo "ERROR: $SUGARPATH already exists - stopping now to prevent damage"
+	exit 1
+fi
+
+if [ -d "/var/lib/mysql/$SUGARDB" ]
+then
+	echo "ERROR: mysql $SUGARDB already exists - stopping now to prevent damage"
+	exit 1
+fi
+
+if [ ! -d "$SUGARPATH" ]
+then
+	rm -f /var/www/sugar-install.zip
+
+	cd /var/www
+
+	if [ -d "$DLPATH" ]
+	then
+		echo "ERROR: $DLPATH already exists?"
+		exit 1
+	fi
+
+	echo "Downloading..."
+	wget -O sugar-install.zip $DOWNLOAD
+	echo "Extracting..."
+	unzip sugar-install.zip >/dev/null
+
+	rm -f /var/www/sugar-install.zip
+
+	if [ ! -d "$DLPATH" ]
+	then
+		echo "ERROR: $DLPATH doesn't exist after unzip"
+		ls -l
+		exit 1
+	fi
+		
+	mv -v $DLPATH $SUGARPATH
+	chown -R $OWNER.$OWNER $SUGARPATH
+
+else
+	echo "WARNING: SugarCRM already installed in $SUGARPATH - no changes made"
+fi
+
+# set the silent install configuration
+
+DEMO="no"
+if [ "$DEMODATA" = "1" ]
+then
+	DEMO="yes"
+fi
+
+cat >$SUGARPATH/config_si.php <<EOF
+<?php
+\$sugar_config_si = array (
+    'setup_db_host_name' => 'localhost',
+    'setup_db_database_name' => '$SUGARDB',
+    'setup_db_drop_tables' => 0,
+    'setup_db_create_database' => 1,
+    'setup_db_pop_demo_data' => $DEMODATA,
+    'setup_db_use_mb_demo_data' => 'no',
+	'demoData' => '$DEMO',
+    'setup_site_admin_user_name' => 'admin',
+    'setup_site_admin_password' => 'changeme',
+    'setup_db_create_sugarsales_user' => 0,
+    'setup_db_admin_user_name' => 'root',
+    'setup_db_admin_password' => '',
+    'setup_db_sugarsales_user' => 'root',
+    'setup_db_sugarsales_password' => '',
+    'setup_db_type' => 'mysql',
+//    'setup_license_key_users' => ${slkeyusers},
+//    'setup_license_key_expire_date' => '${slkeyexpiredate}',
+//    'setup_license_key_oc_licences' => ${slkey_oc_licenses},
+//    'setup_license_key' => '${slkey}',
+    'setup_site_url' => 'http://$SUGARHOST',
+    'setup_system_name' => 'SugarCRM',
+    'default_currency_iso4217' => 'USD',
+    'default_currency_name' => 'US Dollars',
+    'default_currency_significant_digits' => '2',
+    'default_currency_symbol' => '\$',
+    'default_date_format' => 'Y-m-d',
+    'default_time_format' => 'H:i',
+    'default_decimal_seperator' => '.',
+    'default_export_charset' => 'ISO-8859-1',
+    'default_language' => 'en_us',
+    'default_locale_name_format' => 's f l',
+    'default_number_grouping_seperator' => ',',
+    'export_delimiter' => ',',
+);
+?>
+EOF
+
+
+yum -y install php-mbstring php-mysql php-imap lynx mysql-server
+
+# insure mysqld is running
+service mysqld status >/dev/null
+if [ $? -ne 0 ]
+then
+    service mysqld start 
+fi
+
+echo "Rebuilding webserver configuration..."
+webconf
+
+#echo "######################################"
+#echo ""
+#echo "SugarCRM installed as http://$SUGARHOST"
+#echo ""
+
+sleep 1
+
+TEMPFILE="/tmp/html.$$"
+
+echo "Running: lynx -dump http://$SUGARHOST/install.php?goto=SilentInstall&cli=true"
+#lynx -dump http://$SUGARHOST/install.php?goto=SilentInstall&cli=true 
+wget -qO $TEMPFILE "http://$SUGARHOST/install.php?goto=SilentInstall&cli=true"
+lynx -force_html -dump $TEMPFILE
+rm -f $TEMPFILE
+
+sleep 1
+
+if [ ! -d /var/lib/mysql/$SUGARDB ]
+then
+	echo "ERROR: database not created, presuming error..."
+	tail /var/log/httpd/error_log
+else
+	echo ""
+	echo "SugarCRM Installation Completed"
+	echo ""
+	echo "URL: http://$SUGARHOST"
+	echo "User: admin"
+	echo "Pass: changeme"
+	echo ""
+fi
+
+
