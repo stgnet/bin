@@ -81,6 +81,9 @@ do
 	[ -f $WEBROOT/$DOMAIN.options ] && DIRECTORY="$DIRECTORY	Options `cat $WEBROOT/$DOMAIN.options`
 "
 
+	[ -f $WEBROOT/$DOMAIN.directives ] && DIRECTORY="$DIRECTORY	`cat $WEBROOT/$DOMAIN.directives`
+"
+
 	cat <<---- >>$CONFDIR/virtual.conf
 #
 # $DOMAIN => $DOCROOT
