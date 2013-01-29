@@ -37,6 +37,8 @@ cat <<---- >$CONFDIR/virtual.conf
 # Created by webconf (http://github.com/stgnet/bin)
 # Do not edit
 #
+ExtendedStatus on
+#
 # Default ($DEFAULT)
 NameVirtualHost *:80
 NameVirtualHost *:443
@@ -44,6 +46,11 @@ NameVirtualHost *:443
 	ServerAdmin root@$HOSTNAME
 	DocumentRoot $DEFAULT
 	ServerName *
+    <Location /server-status>
+        SetHandler server-status
+		Order deny,allow
+		Allow from all
+    </Location>
 </VirtualHost>
 ---
 
@@ -51,6 +58,28 @@ ls -1 |while read DOMAIN
 do
 	expr index "$DOMAIN" "." >/dev/null || continue
 	[ ! -d "$DOMAIN" ] && continue
+
+    USER=`ls -ld $DOMAIN |cut -d ' ' -f 3`
+    [ "$USER" == "root" ] && USER='apache'
+
+    if [ -f /etc/httpd/conf.d/suphp.conf ]
+    then
+
+        SUPHP="
+            suPHP_Engine off
+            AddHandler php5-script .php
+            "
+        if [ "$USER" != "apache" ]
+        then
+            SUPHP="
+            suPHP_Engine on
+            suPHP_UserGroup $USER $USER
+            AddHandler x-httpd-php .php
+            suPHP_AddHandler x-httpd-php
+            "
+        fi
+    fi
+
 	DOCROOT="$PWD/$DOMAIN"
 	[ -h "$DOCROOT" ] && DOCROOT="`readlink -f $DOCROOT`"
 	[ ! -d "$DOCROOT" ] && continue
@@ -97,6 +126,7 @@ do
 	DocumentRoot $DOCROOT
 	ServerName $DOMAIN
 	ServerAlias www.$DOMAIN
+$SUPHP
 	<Directory $DOCROOT>
 		Order deny,allow
 		Allow from all
@@ -108,5 +138,5 @@ $DIRECTORY
 	
 done
 
-service httpd restart
-
+# special restart sequence to insure restart finishes if run FROM httpd
+bash -c 'sleep 3;trap echo SIGTERM;service httpd stop;sleep 1;service httpd start' >/dev/null  &
