@@ -1,0 +1,27 @@
+#!/bin/sh
+# Install ATRPMS for this version
+
+[ ! -f /etc/redhat-release ] && echo "ERROR: not a RedHat/Fedora/CentOS system" && exit
+
+RHVER="`cat /etc/redhat-release`"
+
+# install key
+rpm --import http://packages.atrpms.net/RPM-GPG-KEY.atrpms
+
+cat >/etc/yum.repos.d/atrpms.repo <<EOF
+[atrpms]
+name=Fedora Core \$releasever - \$basearch - ATrpms
+baseurl=http://dl.atrpms.net/el\$releasever-\$basearch/atrpms/stable
+gpgkey=http://ATrpms.net/RPM-GPG-KEY.atrpms
+gpgcheck=1
+
+[atrpms-testing]
+name=Fedora Core \$releasever - \$basearch - ATrpms
+baseurl=http://dl.atrpms.net/el\$releasever-\$basearch/atrpms/testing
+gpgkey=http://ATrpms.net/RPM-GPG-KEY.atrpms
+gpgcheck=1
+enabled=0
+
+EOF
+
+
