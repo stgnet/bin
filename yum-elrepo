@@ -1,0 +1,28 @@
+#!/bin/sh
+# Install EPEL for this version
+
+[ ! -f /etc/redhat-release ] && echo "ERROR: not a RedHat/Fedora/CentOS system" && exit
+
+RHVER="`cat /etc/redhat-release`"
+
+VERSION=""
+[ "$RHVER" = "CentOS release 6.3 (Final)" ] && VERSION="6"
+[ "$RHVER" = "CentOS release 6.4 (Final)" ] && VERSION="6"
+[ "$RHVER" = "CentOS release 5.7 (Final)" ] && VERSION="5"
+
+[ -z "$VERSION" ] && echo "ERROR: version not implemented in script - please fix:" && echo $RHVER && exit
+
+RPM=""
+[ "$VERSION" = "6" ] && RPM="elrepo-release-6-5.el6.elrepo.noarch.rpm"
+[ "$VERSION" = "5" ] && RPM="elrepo-release-5-4.el6.elrepo.noarch.rpm"
+
+PLATFORM="`uname -m`"
+[ "$PLATFORM" = "i686" ] && PLATFORM="x86_64"
+[ "$PLATFORM" = "i586" ] && PLATFORM="i386"
+
+URL="http://elrepo.org"
+
+rpm --import http://elrepo.org/RPM-GPG-KEY-elrepo.org
+
+rpm -Uvh $URL/$RPM
+
