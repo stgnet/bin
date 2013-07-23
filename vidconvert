@@ -1,0 +1,59 @@
+#!/bin/sh
+# convert all video files to mp4 
+
+convert()
+{
+    FILE="$1"
+    DEST="${FILE%.*}.mp4"
+    if [ ! -f "$DEST" ]
+    then
+        echo "Converting $1"
+        ffmpeg  -vb 750k -i "$FILE" "$DEST"
+    fi
+}
+
+find . | while read FILE
+do
+    FILE="${FILE#./*}"
+    if [ ! -f "$FILE" ]
+    then
+        continue
+    fi
+    EXT="${FILE##*.}"
+    if [ "$EXT" = "$FILE" ]
+    then
+        continue
+    fi
+
+    case "$EXT" in
+
+    mp4) continue ;;
+    txt) continue ;;
+    jpg) continue ;;
+    srt) continue ;;
+    chm) continue ;;
+    nfo) continue ;;
+    zip) continue ;;
+    7z) continue ;;
+    js) continue ;;
+    rar) continue ;;
+    mp3) continue ;;
+    pdf) continue ;;
+    url) continue ;;
+    html) continue ;;
+    css) continue ;;
+    iso) continue ;;
+    ISO) continue ;;
+    diz) continue ;;
+    epub) continue ;;
+
+    flv) convert "$FILE" ;;
+    avi) convert "$FILE" ;;
+    mov) convert "$FILE" ;;
+
+    *)
+        echo "WARNING: Unknown extension $EXT"
+        exit
+        ;;
+    esac
+done
