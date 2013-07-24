@@ -8,7 +8,7 @@ convert()
     if [ ! -f "$DEST" ]
     then
         echo "Converting $1"
-        ffmpeg  -vb 750k -i "$FILE" "$DEST"
+        ffmpeg -v 0 -vb 750k -i "$FILE" "$DEST" 2>/dev/null
     fi
 }
 
@@ -51,9 +51,7 @@ do
     avi) convert "$FILE" ;;
     mov) convert "$FILE" ;;
 
-    *)
-        echo "WARNING: Unknown extension $EXT"
-        exit
-        ;;
+    *) echo "WARNING: Unknown extension $EXT" ;;
+
     esac
 done
