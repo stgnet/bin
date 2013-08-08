@@ -8,7 +8,7 @@ convert()
     if [ ! -f "$DEST" ]
     then
         echo "Converting $1"
-        ffmpeg -v 0 -vb 750k -i "$FILE" "$DEST" 2>/dev/null
+        ffmpeg -v 0 -vb 750k -i "$FILE" "$DEST" 2>/dev/null </dev/null
     fi
 }
 
