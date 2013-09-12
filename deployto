@@ -17,4 +17,4 @@ ssh $USER@$SERVER "[ ! -d $DEST ] && echo Destination $DEST does not exist && ex
 [ "${PWD##*/}" != "${DEST##*/}" ] && echo Destination directory $DEST does not match current directory $PWD && exit 2
 
 echo "Deploying to $USER@$SERVER:$DEST..."
-rsync -avrcn . $USER@$SERVER:$DEST --exclude .svn --exclude .git
+rsync -avrc . $USER@$SERVER:$DEST --exclude .svn --exclude .git
