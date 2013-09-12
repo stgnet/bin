@@ -18,4 +18,4 @@ ssh $USER@$SERVER "[ ! -d $DEST ] && echo Destination $DEST does not exist && ex
 
 echo "Deploying to $USER@$SERVER:$DEST..."
 # note: does not use go switches to avoid breaking apache ownership of target 
-rsync -rlptvc . $USER@$SERVER:$DEST --exclude .svn --exclude .git
+rsync -rlptvc --inplace . $USER@$SERVER:$DEST --exclude .svn --exclude .git
