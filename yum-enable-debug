@@ -1,0 +1,12 @@
+#!/bin/sh
+# Install debug modules for everything
+
+DEBUGINFO_REPO=/etc/yum.repos.d/CentOS-Debuginfo.repo
+
+[ ! -f $DEBUGINFO_REPO ] && echo "ERROR: Cant find $DEBUGINFO_REPO" && exit
+
+sed -i 's/enabled=0/enabled=1/' $DEBUGINFO_REPO
+
+[ ! -f /usr/bin/debuginfo-install ] && yum -y install yum-utils
+
+debuginfo-install '*'
