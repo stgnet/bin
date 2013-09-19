@@ -1,0 +1,8 @@
+#!/bin/sh
+# Enable httpd to core dump to /tmp
+
+[ ! -d /etc/httpd/conf.d ] && echo "ERROR: Cant find /etc/httpd/conf.d" && exit
+
+echo "CoreDumpDirectory /tmp" >/etc/httpd/conf.d/coredump.conf
+
+service httpd restart
