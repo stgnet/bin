@@ -1,0 +1,98 @@
+#!/bin/sh
+# Build asterisk
+
+# need: yum install -y make wget openssl-devel ncurses-devel  newt-devel libxml2-devel kernel-devel gcc gcc-c++ sqlite-devel libuuid-devel
+
+
+VERSIONS=(
+	'1.4'
+	'1.6.2'
+	'1.8'
+	'10'
+	'11'
+	'12'
+	'trunk'
+)
+
+[ -d ~/src/origsvn/asterisk/branches ] && VERSIONS=(`ls ~/src/origsvn/asterisk/branches` 'trunk')
+
+VERSION="$1"
+if [ -z "$VERSION" ]
+then
+	COUNT=1
+	for OPT in ${VERSIONS[*]}
+	do
+		echo "$COUNT: $OPT"
+		COUNT=`expr $COUNT + 1`
+	done
+
+	echo ""
+	echo -n "Select branch to install or enter version: "
+	read SEL
+	[ -z "$SEL" ] && echo "ERROR: no entry" && exit
+	SEL=`expr $SEL - 1`
+	VERSION="${VERSIONS[$SEL]}"
+	[ -z "$VERSION" ] && VERSION="$SEL"
+fi
+
+DEST="$VERSION-`date '+%F-%H-%M'`"
+
+# is that version in the list?
+FOUND=0
+for OPT in ${VERSIONS[*]}
+do
+	if [ "$VERSION" = "$OPT" ]
+	then
+		FOUND=1
+	fi
+done
+
+if [ $FOUND -eq 0 ]
+then
+	# try to download exact version
+	wget -O /tmp/asterisk-$VERSION.tgz http://downloads.asterisk.org/pub/telephony/asterisk/releases/asterisk-$VERSION.tar.gz
+	if [ $? -ne 0 ]
+	then
+		rm /tmp/asterisk-$VERSION.tgz
+		echo "ERROR: Unable to download $VERSION"
+		exit 1
+	fi
+	tar xvfz /tmp/asterisk-$VERSION.tgz
+	if [ ! -d asterisk-$VERSION ]
+	then
+		echo "ERROR: after tar extraction, directory asterisk-$VERSION not found"
+		exit 1
+	fi
+	mv asterisk-$VERSION $DEST
+else
+	# get matching branch from svn
+	VERSIONPATH="$VERSION"
+	[ "$VERSION" != "trunk" ] && VERSIONPATH="branches/$VERSION"
+
+	[ -d "$DEST" ] && echo "Destination directory $DEST already exists!?" && exit
+	mkdir $DEST
+
+	if [ -d ~/src/origsvn/asterisk/$VERSIONPATH ]
+	then
+		if [ -d ~/src/origsvn/asterisk/$VERSIONPATH/.svn ]
+		then
+			echo "Updating SVN..."
+			(cd ~/src/origsvn/asterisk/$VERSIONPATH ; svn up)
+		fi
+		echo "Copying Asterisk $VERSION to directory $DEST"
+		rsync -avr ~/src/origsvn/asterisk/$VERSIONPATH/ $DEST
+	else
+		echo "Downloading Asterisk $VERSION to directory $DEST"
+	
+		svn co http://svn.asterisk.org/svn/asterisk/$VERSIONPATH $DEST
+	fi
+
+fi
+cd $DEST
+
+./configure
+
+make menuselect
+
+make
+
