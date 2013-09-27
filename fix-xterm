@@ -1,0 +1,6 @@
+#!/bin/sh
+# fixes xterm color7 to be half grey instead of nearly invisible
+
+[ ! -f /usr/share/X11/app-defaults/XTerm ] && echo No XTerm config file - did you install xterm && exit
+
+echo '*VT100*color7: gray50' >>/usr/share/X11/app-defaults/XTerm
