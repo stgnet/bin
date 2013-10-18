@@ -29,7 +29,7 @@ then
 	echo ""
 	echo -n "Select branch to install or enter version: "
 	read SEL
-	[ -z "$SEL" ] && echo "ERROR: no entry" && exit
+	[ -z "$SEL" ] && echo "ERROR: no entry" && exit 1
 	SEL=`expr $SEL - 1`
 	VERSION="${VERSIONS[$SEL]}"
 	[ -z "$VERSION" ] && VERSION="$SEL"
@@ -49,6 +49,14 @@ done
 
 if [ $FOUND -eq 0 ]
 then
+	# is it testsuite?
+	if [ "$VERSION" = "testsuite" ]
+	then
+		[ -d testsuite ] && echo "ERROR: testsuite directory already exists" && exit 1
+		svn co http://svn.asterisk.org/svn/testsuite/asterisk/trunk testsuite
+		exit 0
+	fi
+
 	# try to download exact version
 	wget -O /tmp/asterisk-$VERSION.tgz http://downloads.asterisk.org/pub/telephony/asterisk/releases/asterisk-$VERSION.tar.gz
 	if [ $? -ne 0 ]
@@ -69,7 +77,7 @@ else
 	VERSIONPATH="$VERSION"
 	[ "$VERSION" != "trunk" ] && VERSIONPATH="branches/$VERSION"
 
-	[ -d "$DEST" ] && echo "Destination directory $DEST already exists!?" && exit
+	[ -d "$DEST" ] && echo "Destination directory $DEST already exists!?" && exit 1
 	mkdir $DEST
 
 	if [ -d ~/src/origsvn/asterisk/$VERSIONPATH ]
@@ -90,10 +98,25 @@ else
 fi
 cd $DEST
 
-./configure
+./configure --enable-dev-mode || exit $?
 
-make menuselect
+make menuselect || exit $?
 
-make
+make || exit $?
+
+while echo -n "Install (y/n): " && read ANSWER
+do
+	if [ "$ANSWER" = "y" ]
+	then
+		sudo make install
+		[ ! -f /etc/asterisk/extensions.conf ] && sudo make samples
+		break
+	fi
+	if [ "$ANSWER" = "n" -o "$ANSWER" = "" ]
+	then
+		break
+	fi
+done
+
 
 echo "===> LEAVING BUILD DIRECTORY: `pwd`"
