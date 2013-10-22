@@ -53,7 +53,12 @@ then
 	if [ "$VERSION" = "testsuite" ]
 	then
 		[ -d testsuite ] && echo "ERROR: testsuite directory already exists" && exit 1
-		svn co http://svn.asterisk.org/svn/testsuite/asterisk/trunk testsuite
+		if [ -f ~/.subversion/Digium_SVN-cacert-sha1.pem ]
+		then
+			svn co https://origsvn.digium.com/testsuite/asterisk/trunk testsuite
+		else
+			svn co http://svn.asterisk.org/svn/testsuite/asterisk/trunk testsuite
+		fi
 		exit 0
 	fi
 
