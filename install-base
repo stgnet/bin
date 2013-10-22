@@ -1,0 +1,12 @@
+#!/bin/sh
+[ `whoami` != 'root' ] && sudo $0 && exit
+
+# assuming CentOS for now
+yum -y update  
+yum -y install xterm
+
+~/bin/fix-xterm
+
+# add user to wheel and set wheel for nopasswd sudo
+sed -i "/^wheel:/ s/\$/$USERNAME/" /etc/group
+sed -i '/NOPASSWD/ s/^# //' /etc/sudoers

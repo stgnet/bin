@@ -1,0 +1,124 @@
+#!/bin/sh
+# asterisk testsuite - install needed dependancies
+# need epel for PyYAML
+yum-epel
+
+[ `whoami` != 'root' ] && exec sudo $0
+
+# assuming CentOS for now
+
+yum -y install PyYAML lua-devel libpcap-devel gcc-objc python-devel python-twisted subversion libtiff-devel make wget openssl-devel ncurses-devel newt-devel libxml2-devel kernel-devel gcc gcc-c++ sqlite-devel libuuid-devel gtk2-devel gmime-devel
+
+[ ! -d testsuite ] && ba testsuite
+[ ! -d testsuite ] && echo "ERROR: testsuite not installed" && exit 1
+
+testsuite/contrib/scripts/install_prereq install
+
+mkdir testsuite-support
+cd testsuite-support
+
+# SIPp Installation
+
+wget -O sipp.tgz http://sipp.sourceforge.net/snapshots/sipp.2009-07-29.tar.gz
+[ $? -ne 0 ] && exit $?
+
+rm -rf sipp.svn
+tar xvfz sipp.tgz
+cd sipp.svn
+make pcapplay_ossl
+[ $? -ne 0 ] && echo "ERROR: make pcapplay_ossl failed" && exit 1
+cp sipp /usr/bin
+
+cd ..
+
+
+# install PJSUA
+
+rm -rf pjproject
+svn co http://svn.pjsip.org/repos/pjproject/trunk pjproject
+cd pjproject
+./configure CFLAGS=-fPIC
+echo "#define PJ_HAS_IPV6 1" >pjlib/include/pj/config_site.h
+cat pjlib/include/pj/config_site_sample.h  >>pjlib/include/pj/config_site.h
+make dep
+[ $? -ne 0 ] && echo "ERROR: make pjproject def failed" && exit 1
+make
+[ $? -ne 0 ] && echo "ERROR: make pjproject failed" && exit 1
+cp pjsip-apps/bin/pjsua-x86_64-unknown-linux-gnu /usr/sbin/pjsua
+
+make -C pjsip-apps/src/python install
+[ $? -ne 0 ] && echo "ERROR: make pjproject python install failed" && exit 1
+
+cd ..
+
+
+# install spandsp
+
+wget -O spandsp.tgz http://soft-switch.org/downloads/spandsp/spandsp-0.0.6pre21.tgz
+[ $? -ne 0 ] && exit $?
+rm -rf spandsp-0.0.6
+tar xvfz spandsp.tgz 
+[ ! -d spandsp-0.0.6 ] && echo "ERROR: tarball directory spandsp-0.0.6 missing" && exit 1
+cd spandsp-0.0.6
+./configure
+make
+[ $? -ne 0 ] && echo "ERROR: make spandsp failed" && exit 1
+make install
+[ $? -ne 0 ] && echo "ERROR: make spandsp install failed" && exit 1
+
+cd ..
+
+
+# install libsrtp
+
+wget -O srtp.tgz http://srtp.sourceforge.net/srtp-1.4.2.tgz
+rm -rf srtp
+tar xvfz  srtp.tgz 
+[ ! -d srtp ] && echo "ERROR: tarbal directory srtp missing" && exit 1
+cd srtp
+./configure CFLAGS=-fPIC --prefix=/usr
+make
+[ $? -ne 0 ] && echo "ERROR: make libsrtp failed" && exit 1
+make runtest
+[ $? -ne 0 ] && echo "ERROR: make libsrtp runtest failed" && exit 1
+make uninstall >/dev/null 2>/dev/null
+make install
+[ $? -ne 0 ] && echo "ERROR: make libsrtp install failed" && exit 1
+
+cd ..
+
+# now at testsuite-support
+
+cd ..
+
+[ ! -d testsuite ] && echo "ERROR: path mixup need testsuite from `pwd`" && exit 1
+cd testsuite
+
+# now in testsuite root
+
+# ASTTest installation
+cd asttest
+make
+[ $? -ne 0 ] && echo "ERROR: make asttest failed" && exit 1
+make install
+[ $? -ne 0 ] && echo "ERROR: make asttest install failed" && exit 1
+
+#asttest 2>/dev/null
+#[ $? -ne 1 ] && echo "ERROR: failed asttest installation" && exit 1 
+
+cd ..
+
+# StarPY Installation
+
+cd addons
+make update
+[ $? -ne 0 ] && echo "ERROR: make update failed" && exit 1
+cd starpy
+python setup.py install
+[ $? -ne 0 ] && echo "ERROR: python starpy setup.py install failed" && exit 1
+cd ..
+cd ..
+
+echo ""
+echo "*** Configure asterisk with ./configure --enable-dev-mode and install ***"
+echo ""

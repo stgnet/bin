@@ -85,15 +85,20 @@ else
 	[ -d "$DEST" ] && echo "Destination directory $DEST already exists!?" && exit 1
 	mkdir $DEST
 
-	if [ -d ~/src/origsvn/asterisk/$VERSIONPATH ]
+#	if [ -d ~/src/origsvn/asterisk/$VERSIONPATH ]
+#	then
+#		if [ -d ~/src/origsvn/asterisk/$VERSIONPATH/.svn ]
+#		then
+#			echo "Updating SVN..."
+#			(cd ~/src/origsvn/asterisk/$VERSIONPATH ; svn up)
+#		fi
+#		echo "Copying Asterisk $VERSION to directory $DEST"
+#		rsync -avr ~/src/origsvn/asterisk/$VERSIONPATH/ $DEST
+
+	if [ -f ~/.subversion/Digium_SVN-cacert-sha1.pem ]
 	then
-		if [ -d ~/src/origsvn/asterisk/$VERSIONPATH/.svn ]
-		then
-			echo "Updating SVN..."
-			(cd ~/src/origsvn/asterisk/$VERSIONPATH ; svn up)
-		fi
-		echo "Copying Asterisk $VERSION to directory $DEST"
-		rsync -avr ~/src/origsvn/asterisk/$VERSIONPATH/ $DEST
+		echo "Checking out Asterisk $VERSION to directory $DEST"
+		svn co https://origsvn.digium.com/svn/asterisk/$VERSIONPATH $DEST
 	else
 		echo "Downloading Asterisk $VERSION to directory $DEST"
 	

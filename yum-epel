@@ -1,5 +1,6 @@
 #!/bin/sh
 # Install EPEL for this version
+[ `whoami` != 'root' ] && exec sudo $0
 
 [ ! -f /etc/redhat-release ] && echo "ERROR: not a RedHat/Fedora/CentOS system" && exit
 
