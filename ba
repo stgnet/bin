@@ -55,7 +55,7 @@ then
 		[ -d testsuite ] && echo "ERROR: testsuite directory already exists" && exit 1
 		if [ -f ~/.subversion/Digium_SVN-cacert-sha1.pem ]
 		then
-			svn co https://origsvn.digium.com/testsuite/asterisk/trunk testsuite
+			svn co https://origsvn.digium.com/svn/testsuite/asterisk/trunk testsuite
 		else
 			svn co http://svn.asterisk.org/svn/testsuite/asterisk/trunk testsuite
 		fi
