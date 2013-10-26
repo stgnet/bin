@@ -7,7 +7,7 @@ yum-epel
 
 # assuming CentOS for now
 
-yum -y install PyYAML lua-devel libpcap-devel gcc-objc python-devel python-twisted subversion libtiff-devel make wget openssl-devel ncurses-devel newt-devel libxml2-devel kernel-devel gcc gcc-c++ sqlite-devel libuuid-devel gtk2-devel gmime-devel
+yum -y install PyYAML lua-devel libpcap-devel gcc-objc python-devel python-twisted subversion libtiff-devel make wget openssl-devel ncurses-devel newt-devel libxml2-devel kernel-devel gcc gcc-c++ sqlite-devel libuuid-devel gtk2-devel gmime-devel patch python-setuptools
 
 [ ! -d testsuite ] && ba testsuite
 [ ! -d testsuite ] && echo "ERROR: testsuite not installed" && exit 1
