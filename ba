@@ -118,6 +118,7 @@ while echo -n "Install (y/n): " && read ANSWER
 do
 	if [ "$ANSWER" = "y" ]
 	then
+		sudo make uninstall
 		sudo make install
 		[ ! -f /etc/asterisk/extensions.conf ] && sudo make samples
 		break
