@@ -19,13 +19,18 @@ cd testsuite-support
 
 # SIPp Installation
 
-wget -O sipp.tgz http://sipp.sourceforge.net/snapshots/sipp.2009-07-29.tar.gz
+# this is v3.1: http://sipp.sourceforge.net/snapshots/sipp.2009-07-29.tar.gz
+wget -O sipp.tgz http://downloads.sourceforge.net/project/sipp/sipp/3.3/sipp-3.3.tar.gz
 [ $? -ne 0 ] && exit $?
 
-rm -rf sipp.svn
-[ $? -ne 0 ] && echo "ERROR: rm -rf sipp.svn failed" && exit 1
+SIPP_DIR="sipp-3.3"
+
+rm -rf $SIPP_DIR
+[ $? -ne 0 ] && echo "ERROR: rm -rf $SIPP_DIR failed" && exit 1
 tar xvfz sipp.tgz
-cd sipp.svn
+[ $? -ne 0 ] && echo "ERROR: tar extraction failed" && exit 1
+[ ! -d $SIPP_DIR ] && echo "ERROR: tar extraction target missing" && exit 1
+cd $SIPP_DIR
 make pcapplay_ossl
 [ $? -ne 0 ] && echo "ERROR: make pcapplay_ossl failed" && exit 1
 sudo cp sipp /usr/bin
