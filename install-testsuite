@@ -10,12 +10,27 @@ yum-epel
 
 # assuming CentOS for now
 
-sudo yum -y install automake PyYAML lua-devel libpcap-devel gcc-objc python-devel python-twisted subversion libtiff-devel make wget openssl-devel ncurses-devel newt-devel libxml2-devel kernel-devel gcc gcc-c++ sqlite-devel libuuid-devel gtk2-devel gmime-devel gmime22-devel patch python-setuptools unixODBC-devel libcurl-devel libogg-devel libvorbis-devel speex-devel spandsp-devel freetds-devel net-snmp-devel iksemel-devel openais-devel popt-devel libtool-ltdl-devel libsqlite3x-devel radiusclient-ng-devel portaudio-devel postgresql-devel libresample-devel neon-devel libical-devel openldap-devel sqlite2-devel mysql-devel bluez-libs-devel jack-audio-connection-kit-devel
+sudo yum -y install automake PyYAML lua-devel libpcap-devel gcc-objc python-devel python-twisted git subversion libtiff-devel make wget openssl-devel ncurses-devel newt-devel libxml2-devel kernel-devel gcc gcc-c++ sqlite-devel libuuid-devel gtk2-devel gmime-devel gmime22-devel patch python-setuptools unixODBC-devel libcurl-devel libogg-devel libvorbis-devel speex-devel spandsp-devel freetds-devel net-snmp-devel iksemel-devel openais-devel popt-devel libtool-ltdl-devel libsqlite3x-devel radiusclient-ng-devel portaudio-devel postgresql-devel libresample-devel neon-devel libical-devel openldap-devel sqlite2-devel mysql-devel bluez-libs-devel jack-audio-connection-kit-devel Cython python-pip
 
 #testsuite/contrib/scripts/install_prereq install
 
+# need python construct from pip
+[ ! -d /usr/lib/python2.6/site-packages/construct ] && sudo pip install construct
+
 mkdir testsuite-support
 cd testsuite-support
+
+# yappcap Installation
+
+git clone https://github.com/otherwiseguy/yappcap
+[ $? -ne 0 ] && echo "ERROR: git clone yappcap failed" && exit 1
+[ ! -d yappcap ] && echo "ERROR: target directory yappcap missing" && exit 1
+cd yappcap
+make
+[ $? -ne 0 ] && echo "ERROR: make yappcap failed" && exit 1
+sudo make install
+[ $? -ne 0 ] && echo "ERROR: make yappcap install failed" && exit 1
+cd ..
 
 # SIPp Installation
 
@@ -130,6 +145,7 @@ sudo python setup.py install
 [ $? -ne 0 ] && echo "ERROR: python starpy setup.py install failed" && exit 1
 cd ..
 cd ..
+
 
 echo ""
 echo "*** Configure asterisk with ./configure --enable-dev-mode and install ***"
