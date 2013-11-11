@@ -3,6 +3,14 @@
 
 # need: yum install -y make wget openssl-devel ncurses-devel  newt-devel libxml2-devel kernel-devel gcc gcc-c++ sqlite-devel libuuid-devel gtk2-devel
 
+INSTALL=0
+
+if [ "$1" = "-i" ]
+then
+    shift
+    INSTALL=1
+fi
+
 
 VERSIONS=(
 	'1.4'
@@ -114,20 +122,28 @@ make menuselect || exit $?
 
 make || exit $?
 
-while echo -n "Install (y/n): " && read ANSWER
-do
-	if [ "$ANSWER" = "y" ]
-	then
-		sudo make uninstall
-		sudo make install
-		[ ! -f /etc/asterisk/extensions.conf ] && sudo make samples
-		break
-	fi
-	if [ "$ANSWER" = "n" -o "$ANSWER" = "" ]
-	then
-		break
-	fi
-done
+if [ $INSTALL -eq 0 ]
+then
+    while echo -n "Install (y/n): " && read ANSWER
+    do
+    	if [ "$ANSWER" = "y" ]
+    	then
+            INSTALL=1
+    		break
+    	fi
+    	if [ "$ANSWER" = "n" -o "$ANSWER" = "" ]
+    	then
+    		break
+    	fi
+    done
+fi
+
+if [ $INSTALL -eq 1 ]
+then
+	sudo make uninstall
+	sudo make install
+	[ ! -f /etc/asterisk/extensions.conf ] && sudo make samples
+fi
 
 
 echo "===> LEAVING BUILD DIRECTORY: `pwd`"
