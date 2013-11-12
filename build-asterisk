@@ -201,7 +201,7 @@ then
 	read BOGUS
 	if [ -z "$INSTALL_PATH" ]
 	then
-		# presume that root installation is necessary
+		# presume that root installation is necessary using sudo
 		sudo make uninstall 
 		sudo make install
 		[ ! -f /etc/asterisk/extensions.conf ] && sudo make samples
@@ -210,7 +210,13 @@ then
 		[ ! -d "$INSTALL_PATH" ] && mkdir -p "$INSTALL_PATH"
 		[ ! -d "$INSTALL_PATH" ] && echo "ERROR: unable to craete INSTALL_PATH $INSTALL_PATH" && exit 1
 		make install 
-		[ ! -f $INSTALL_PATH/etc/asterisk/extensions.conf ] && make samples
+
+		if [ ! -f $INSTALL_PATH/etc/asterisk/extensions.conf ]
+		then
+			make samples
+			# and fixup paths in asterisk.conf to match
+			sed -i "s|=> /|=> $INSTALL_PATH/|" $INSTALL_PATH/etc/asterisk/
+		fi
 	fi
 fi
 
