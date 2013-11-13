@@ -1,8 +1,9 @@
 #!/bin/sh
 # Build asterisk (download, compile, install) with many options
 
-# this script does _not_ check to see if you have the necessary packages installed
 # need: yum install -y make wget openssl-devel ncurses-devel  newt-devel libxml2-devel kernel-devel gcc gcc-c++ sqlite-devel libuuid-devel gtk2-devel
+! which svn 2>/dev/null && sudo yum -y install subversion
+! which gcc 2>/dev/null && sudo yum -y install gcc-c++ 
 
 ASKINSTALL=true
 INSTALL=false
