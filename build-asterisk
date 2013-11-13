@@ -198,8 +198,6 @@ fi
 
 if $INSTALL
 then
-	echo "INSTALL_PATH=$INSTALL_PATH"
-	read BOGUS
 	if [ -z "$INSTALL_PATH" ]
 	then
 		# presume that root installation is necessary using sudo
