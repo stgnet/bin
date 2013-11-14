@@ -1,0 +1,44 @@
+#!/bin/sh
+# asterisk (local) command
+
+# assuming $PWD is the dest directory given
+# to build-asterisk -i(dest), then give that
+# instance a command
+
+# additional commands are "start" and "stop"
+# which map to starting asterisk with the
+# proper command line arguments, and stop
+# maps to cli: core stop now
+
+AST="./usr/sbin/asterisk"
+
+if [ ! -x $AST ]
+then
+	# we're not in DEST directory
+	# hunt around for it a little bit ?
+	cd ..
+	if [ ! -x $AST ]
+	then
+		echo "ERROR: Unable to locate local asterisk instance"
+		exit 1
+	fi
+fi
+
+if [ "$1" = "start" ]
+then
+	# special case
+	# start this copy of asterisk
+	# pass any additional arguments to the command line
+	shift
+	$AST -C $PWD/etc/asterisk/asterisk.conf -c $*
+	exit $?
+fi
+
+CLI="$*"
+
+if [ "$1" = "stop" ]
+then
+	CLI="core stop now"
+fi
+
+$AST -C $PWD/etc/asterisk/asterisk.conf -rx "$CLI"
