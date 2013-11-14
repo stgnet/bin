@@ -1,5 +1,14 @@
 #!/bin/sh
 # Build asterisk (download, compile, install) with many options
+# Usage: build-asterisk {version} {svn-revision}
+# Options:
+#          -i = install after build succeds
+#          -i(path) = install to local path (see local-asterisk)
+#          -n = do not install (otherwise it prompts)
+#          -v = build into directory with the version number (no suffix)
+#
+# If not supplied with a version a list is given to choose from
+# If not provided an svn-revsion the latest is used
 
 # need: yum install -y make wget openssl-devel ncurses-devel  newt-devel libxml2-devel kernel-devel gcc gcc-c++ sqlite-devel libuuid-devel gtk2-devel
 ! which svn >/dev/null && sudo yum -y install subversion
@@ -51,6 +60,8 @@ do
 	esac
 done
 
+VERSION="$1"
+SVNREV="$2"
 
 VERSIONS=(
 	'1.4'
@@ -64,7 +75,6 @@ VERSIONS=(
 
 [ -d ~/src/origsvn/asterisk/branches ] && VERSIONS=(`ls ~/src/origsvn/asterisk/branches` 'trunk')
 
-VERSION="$1"
 if [ -z "$VERSION" ]
 then
 	COUNT=1
@@ -82,6 +92,9 @@ then
 	VERSION="${VERSIONS[$SEL]}"
 	[ -z "$VERSION" ] && VERSION="$SEL"
 fi
+
+SVNATREV=""
+[ ! -z "$SVNREV" ] && SVNATREV="@$SVNREV"
 
 #DEST="$VERSION-`date '+%F-%H-%M'`"
 DEST="$VERSION"
@@ -144,9 +157,15 @@ else
 	fi
 
 	# get the revision number
-	REVISION="`svn info $SVNURL |fgrep Revision:`"
-	[ -z "$REVISION" ] && echo "ERROR: unable to obtain svn revision number?" && exit 1
-	REVNUM=${REVISION#*: }
+	if [ -z "$SVNREV" ]
+	then
+		REVISION="`svn info $SVNURL |fgrep Revision:`"
+		[ -z "$REVISION" ] && echo "ERROR: unable to obtain svn revision number?" && exit 1
+		REVNUM=${REVISION#*: }
+	else
+		# or used the supplied one
+		REVNUM="$SVNREV"
+	fi
 
 	if ! $VERDEST
 	then
@@ -157,7 +176,7 @@ else
 	mkdir $DEST
 
 	echo "Downloading Asterisk $VERSION to directory $DEST"
-	svn co $SVNURL $DEST
+	svn co $SVNURL$SVNATREV $DEST
 
 fi
 cd $DEST
@@ -206,6 +225,7 @@ then
 		[ ! -f /etc/asterisk/extensions.conf ] && sudo make samples
 		if [ `uname -m` = "x86_64" ] 
 		then
+			# older asterisk.conf may have wrong path
 			sed -i '/^astmoddir/ s|/usr/lib/|/usr/lib64/|' /etc/asterisk/asterisk.conf
 		fi
 	else
