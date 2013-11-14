@@ -205,6 +205,10 @@ then
 		sudo make uninstall 
 		sudo make install
 		[ ! -f /etc/asterisk/extensions.conf ] && sudo make samples
+		if [ `uname -m` = "x86_64" ] 
+		then
+			sed -i '/^astmoddir/ s|/usr/lib/|/usr/lib64/|' /etc/asterisk/asterisk.conf
+		fi
 	else
 		# installing locally - insure directory exists
 		[ ! -d "$INSTALL_PATH" ] && mkdir -p "$INSTALL_PATH"
