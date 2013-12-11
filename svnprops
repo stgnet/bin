@@ -1,0 +1,3 @@
+svn propset svn:mime-type text/plain $*
+svn propset svn:eol-style native $*
+svn propset svn:keywords 'Author Date Id Revision' $*
