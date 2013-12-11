@@ -3,6 +3,25 @@
 # http://wiki.freepbx.org/display/HTGS/Installing+FreePBX+on+Centos+6.3
 
 [ `whoami` != 'root' ] && exec sudo $0
+
+if ! which asterisk
+then
+	echo "Please install the version of asterisk you want to use first."
+	exit 1
+fi
+
+if [ -z "`sestatus |grep 'status: *disabled'`" ]
+then
+	echo "Disabling selinux..."
+	sed -i 's/SELINUX=.*/SELINUX=disabled/' /etc/sysconfig/selinux
+	echo 0 >/selinux/enforce
+fi
+if [ -z "`sestatus |grep 'status: *disabled'`" ]
+then
+	echo "Please reboot, then retry install"
+	exit 1
+fi
+
 [ ! -d /usr/src ] && mkdir -p /usr/src
 cd /usr/src
 
@@ -19,6 +38,11 @@ yum -y groupinstall base
 
 yum -y install gcc gcc-c++ bison mysql-devel mysql-server php php-mysql php-pear php-mbstring tftp-server httpd make ncurses-devel libtermcap-devel sendmail sendmail-cf caching-nameserver sox newt-devel libxml2-devel libtiff-devel audiofile-devel gtk2-devel subversion kernel-devel git subversion kernel-devel php-process
 
+# stole this from install-testsuite -- TODO: cleanup
+yum -y install automake PyYAML lua-devel libpcap-devel gcc-objc python-devel python-twisted git subversion libtiff-devel make wget openssl-devel ncurses-devel newt-devel libxml2-devel kernel-devel gcc gcc-c++ sqlite-devel libuuid-devel gtk2-devel gmime-devel gmime22-devel patch python-setuptools unixODBC-devel libcurl-devel libogg-devel libvorbis-devel speex-devel spandsp-devel freetds-devel net-snmp-devel iksemel-devel openais-devel popt-devel libtool-ltdl-devel libsqlite3x-devel radiusclient-ng-devel portaudio-devel postgresql-devel libresample-devel neon-devel libical-devel openldap-devel sqlite2-devel mysql-devel bluez-libs-devel jack-audio-connection-kit-devel Cython python-pip
+yum -y install libtool-ltdl-devel unixODBC unixODBC-devel mysql-connector-odbc
+
+
 pear install db
 
 # skipping GV depenencies as it's obsolete
@@ -26,17 +50,29 @@ pear install db
 # skipping DAHDI as this is targetting a virtual server
 
 # install asterisk (let caller pick version)
-$(eval echo ~${USER})/bin/ba -i || exit 1
+#$(eval echo ~${USER})/bin/ba -i || exit 1
 
 # install extra sounds
 wget -O - http://downloads.asterisk.org/pub/telephony/sounds/asterisk-extra-sounds-en-gsm-current.tar.gz | tar xvfz - --directory=/var/lib/asterisk/sounds
 
+# remove any existing configuration
+if [ ! -d /etc/asterisk-before-freepbx ]
+then
+	echo "Saving copy of /etc/asterisk configuration to /etc/asterisk-before-freepbx..."
+	mkdir /etc/asterisk-before-freepbx
+	rsync -avr /etc/asterisk/. /etc/asterisk-before-freepbx/.
+fi
+rm -rf /etc/asterisk
+mkdir /etc/asterisk
+
 # get FreePBX
+rm -rf freepbx
 export VER_FREEPBX=2.11
 svn co http://www.freepbx.org/v2/svn/freepbx/branches/${VER_FREEPBX} freepbx
+[ ! -d freepbx ] && echo "ERROR: freepbx directory missing after svn co" && exit 1
 cd freepbx
 
-[ -z "`grep '^asterisk:' /etc/passwd`" ] && adduser asterisk -M -c "Asterisk User"
+[ -z "`grep '^asterisk:' /etc/passwd`" ] && adduser asterisk -M -d /var/lib/asterisk -s /sbin/nologin -c "Asterisk User"
 chown asterisk. /var/run/asterisk
 chown -R asterisk. /etc/asterisk
 chown -R asterisk. /var/{lib,log,spool}/asterisk
@@ -45,6 +81,8 @@ chown -R asterisk. /usr/lib/asterisk
 chown -R asterisk. /var/www
 
 sed -i 's/\(^upload_max_filesize =\).*/\120M/' /etc/php.ini
+sed -i 's/\(^post_max_size =\).*/\120M/' /etc/php.ini
+sed -i 's/\(^memory_limit =\).*/\1128M/' /etc/php.ini
 sed -i 's/^\(User\|Group\).*/\1 asterisk/' /etc/httpd/conf/httpd.conf
 service httpd restart
 service mysqld restart
@@ -61,10 +99,12 @@ mysql -u root -e "GRANT ALL PRIVILEGES ON asterisk.* to asteriskuser@localhost I
 mysql -u root -e "GRANT ALL PRIVILEGES ON asteriskcdrdb.* to asteriskuser@localhost IDENTIFIED BY '${ASTERISK_DB_PW}';"
 mysql -u root -e "flush privileges;"
 
+set -x 
 ./start_asterisk start
 ./install_amp --my-svn-is-correct || ./install_amp --my-svn-is-correct --username=asteriskuser --password=$ASTERISK_DB_PW
 amportal a ma installall 
 amportal a reload
+set +x
 
 ln -s /var/lib/asterisk/moh /var/lib/asterisk/mohmp3
 amportal start
