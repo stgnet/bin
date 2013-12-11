@@ -2,10 +2,11 @@
 # Build asterisk (download, compile, install) with many options
 # Usage: build-asterisk {version} {svn-revision}
 # Options:
-#          -i = install after build succeds
-#          -i(path) = install to local path (see local-asterisk)
-#          -n = do not install (otherwise it prompts)
-#          -v = build into directory with the version number (no suffix)
+#	-i = install after build succeds
+#	-i(path) = install to local path (see local-asterisk)
+#	-n = do not install (otherwise it prompts)
+#	-v = build into directory with the version number (no suffix)
+#	-c = use certified branch
 #
 # If not supplied with a version a list is given to choose from
 # If not provided an svn-revsion the latest is used
@@ -18,6 +19,7 @@ ASKINSTALL=true
 INSTALL=false
 VERDEST=false
 DONTOPT=true
+CERTIFIED=false
 
 while [ "${1:0:1}" == "-" ]
 do
@@ -54,6 +56,11 @@ do
 		shift
 		DONTOPT=false
 		;;
+	-c)
+		# certified branch
+		shift
+		CERTIFIED=true
+		;;
 	*)
 		echo "ERROR: unknown argument: $1"
 		exit 1
@@ -73,7 +80,6 @@ VERSIONS=(
 	'trunk'
 )
 
-[ -d ~/src/origsvn/asterisk/branches ] && VERSIONS=(`ls ~/src/origsvn/asterisk/branches` 'trunk')
 
 if [ -z "$VERSION" ]
 then
@@ -109,8 +115,6 @@ do
 	fi
 done
 
-if [ $FOUND -eq 0 ]
-then
 	# is it testsuite?
 	if [ "$VERSION" = "testsuite" ]
 	then
@@ -121,33 +125,40 @@ then
 		else
 			svn co http://svn.asterisk.org/svn/testsuite/asterisk/trunk testsuite
 		fi
+		# stop here
 		exit 0
 	fi
 
-	if ! $VERDEST
-	then
-		DEST="$VERSION-release"
-	fi
+# for now, presume always to install from SVN
+#	if ! $VERDEST
+#	then
+#		DEST="$VERSION-release"
+#	fi
+#
+#	# try to download exact version
+#	wget -O /tmp/asterisk-$VERSION.tgz http://downloads.asterisk.org/pub/telephony/asterisk/releases/asterisk-$VERSION.tar.gz
+#	if [ $? -ne 0 ]
+#	then
+#		rm /tmp/asterisk-$VERSION.tgz
+#		echo "ERROR: Unable to download $VERSION"
+#		exit 1
+#	fi
+#	tar xvfz /tmp/asterisk-$VERSION.tgz
+#	if [ ! -d asterisk-$VERSION ]
+#	then
+#		echo "ERROR: after tar extraction, directory asterisk-$VERSION not found"
+#		exit 1
+#	fi
+#	mv asterisk-$VERSION $DEST
+#else
 
-	# try to download exact version
-	wget -O /tmp/asterisk-$VERSION.tgz http://downloads.asterisk.org/pub/telephony/asterisk/releases/asterisk-$VERSION.tar.gz
-	if [ $? -ne 0 ]
-	then
-		rm /tmp/asterisk-$VERSION.tgz
-		echo "ERROR: Unable to download $VERSION"
-		exit 1
-	fi
-	tar xvfz /tmp/asterisk-$VERSION.tgz
-	if [ ! -d asterisk-$VERSION ]
-	then
-		echo "ERROR: after tar extraction, directory asterisk-$VERSION not found"
-		exit 1
-	fi
-	mv asterisk-$VERSION $DEST
-else
 	# get matching branch from svn
 	VERSIONPATH="$VERSION"
 	[ "$VERSION" != "trunk" ] && VERSIONPATH="branches/$VERSION"
+	if $CERTIFIED
+	then
+		VERSIONPATH="certified/$VERSIONPATH"
+	fi
 	FULLPATH="svn/asterisk/$VERSIONPATH"
 	SVNURL="http://svn.asterisk.org/$FULLPATH"
 	if [ -f ~/.subversion/Digium_SVN-cacert-sha1.pem ]
@@ -170,6 +181,10 @@ else
 	if ! $VERDEST
 	then
 		DEST="$VERSION-r$REVNUM"
+		if $CERTIFIED
+		then
+			DEST="$VERSION-cert-r$REVNUM"
+		fi
 	fi
 
 	[ -d "$DEST" ] && echo "Destination directory $DEST already exists!?" && exit 1
@@ -178,7 +193,7 @@ else
 	echo "Downloading Asterisk $VERSION to directory $DEST"
 	svn co $SVNURL$SVNATREV $DEST
 
-fi
+#fi
 cd $DEST
 
 # dev mode is requsted by testsuite - use by default
@@ -226,7 +241,7 @@ then
 		if [ `uname -m` = "x86_64" ] 
 		then
 			# older asterisk.conf may have wrong path
-			sed -i '/^astmoddir/ s|/usr/lib/|/usr/lib64/|' /etc/asterisk/asterisk.conf
+			sudo sed -i '/^astmoddir/ s|/usr/lib/|/usr/lib64/|' /etc/asterisk/asterisk.conf
 		fi
 	else
 		# installing locally - insure directory exists
