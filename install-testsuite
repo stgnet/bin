@@ -66,7 +66,7 @@ make dep
 [ $? -ne 0 ] && echo "ERROR: make pjproject def failed" && exit 1
 make
 [ $? -ne 0 ] && echo "ERROR: make pjproject failed" && exit 1
-sudo cp pjsip-apps/bin/pjsua-x86_64-unknown-linux-gnu /usr/sbin/pjsua
+sudo cp pjsip-apps/bin/pjsua-`uname -m`-unknown-linux-gnu /usr/sbin/pjsua
 
 sudo make -C pjsip-apps/src/python install
 [ $? -ne 0 ] && echo "ERROR: make pjproject python install failed" && exit 1
