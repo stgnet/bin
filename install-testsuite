@@ -16,6 +16,8 @@ sudo yum -y install automake PyYAML lua-devel libpcap-devel gcc-objc python-deve
 
 # need python construct from pip
 [ ! -d /usr/lib/python2.6/site-packages/construct ] && sudo pip install construct
+[ ! -d /usr/lib/python2.6/site-packages/requests ] && sudo pip install requests
+[ ! -d /usr/lib/python2.6/site-packages/autobahn ] && sudo pip install autobahn
 
 mkdir testsuite-support
 cd testsuite-support
