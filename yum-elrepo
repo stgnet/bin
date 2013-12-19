@@ -8,6 +8,7 @@ RHVER="`cat /etc/redhat-release`"
 VERSION=""
 [ "$RHVER" = "CentOS release 6.3 (Final)" ] && VERSION="6"
 [ "$RHVER" = "CentOS release 6.4 (Final)" ] && VERSION="6"
+[ "$RHVER" = "CentOS release 6.5 (Final)" ] && VERSION="6"
 [ "$RHVER" = "CentOS release 5.7 (Final)" ] && VERSION="5"
 
 [ -z "$VERSION" ] && echo "ERROR: version not implemented in script - please fix:" && echo $RHVER && exit
