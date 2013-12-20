@@ -57,39 +57,44 @@ cd ..
 # install PJPROJECT
 
 rm -rf pjproject
-git clone https://github.com/asterisk/pjproject pjproject
+git clone https://github.com/asterisk/pjproject pjproject >svn-co-pjproject.out
+[ $? -ne 0 ] && echo "ERROR: svn co pjproject failed" && exit 1
 cd pjproject
+[ $? -ne 0 ] && echo "ERROR: cd to pjproject failed" && exit 1
 ./configure --prefix=/usr --enable-shared --disable-sound --disable-resample --disable-video --disable-opencore-amr --libdir=/usr/lib64
-make dep
+make dep > make-dep.out
 [ $? -ne 0 ] && echo "ERROR: make dep pjproject failed" && exit 1
-make
+make >make.out
 [ $? -ne 0 ] && echo "ERROR: make pjproject failed" && exit 1
 sudo make install
 sudo ldconfig
-
+cd ..
 
 # install PJSUA
 
 rm -rf pjsua
 [ $? -ne 0 ] && echo "ERROR: rm -rf pjsua failed" && exit 1
-svn co http://svn.pjsip.org/repos/pjproject/trunk pjsua
+svn co http://svn.pjsip.org/repos/pjproject/trunk pjsua >svn-co-pjsua.out
+[ $? -ne 0 ] && echo "ERROR: svn co pjsua failed" && exit 1
 cd pjsua
+[ $? -ne 0 ] && echo "ERROR: cd to pjsua failed" && exit 1
 ./configure CFLAGS=-fPIC
 echo "#define PJ_HAS_IPV6 1" >pjlib/include/pj/config_site.h
 cat pjlib/include/pj/config_site_sample.h  >>pjlib/include/pj/config_site.h
-make dep
+make dep >make-dep.out
 [ $? -ne 0 ] && echo "ERROR: make pjsua def failed" && exit 1
-make
+make >make.out
 [ $? -ne 0 ] && echo "ERROR: make pjsua failed" && exit 1
-sudo cp pjsip-apps/bin/pjsua-`uname -m`-unknown-linux-gnu /usr/sbin/pjsua
-
-sudo make -C pjsip-apps/src/python install
+make -C pjsip-apps/build pjsua  >make-pjsua.out
+[ $? -ne 0 ] && echo "ERROR: make pjsua specifically failed" && exit 1
+sudo cp -v pjsip-apps/bin/pjsua-`uname -m`-unknown-linux-gnu /usr/sbin/pjsua
+[ $? -ne 0 ] && echo "ERROR: cp pjsua install failed" && exit 1
+sudo make -C pjsip-apps/src/python install >make-install.out
 [ $? -ne 0 ] && echo "ERROR: make pjsua python install failed" && exit 1
 
 # some files left as root
 sudo chown -R $USER.$USER .
 cd ..
-
 
 # install spandsp
 
@@ -158,6 +163,7 @@ make update
 cd starpy
 sudo python setup.py install
 [ $? -ne 0 ] && echo "ERROR: python starpy setup.py install failed" && exit 1
+sudo chown -R $USER.$USER .
 cd ..
 cd ..
 
