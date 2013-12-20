@@ -16,6 +16,8 @@ sudo yum -y install automake PyYAML lua-devel libpcap-devel gcc-objc python-deve
 
 # need python construct from pip
 [ ! -d /usr/lib/python2.6/site-packages/construct ] && sudo pip install construct
+[ ! -d /usr/lib/python2.6/site-packages/requests ] && sudo pip install requests
+[ ! -d /usr/lib/python2.6/site-packages/autobahn ] && sudo pip install autobahn
 
 mkdir testsuite-support
 cd testsuite-support
@@ -159,6 +161,18 @@ sudo python setup.py install
 cd ..
 cd ..
 
+# if libjansson not installed...
+if [ ! -f /usr/local/lib/libjansson.so.4 ]
+then
+	wget -O /tmp/jansson-2.4.tar.gz http://www.digip.org/jansson/releases/jansson-2.4.tar.gz
+	tar xvfz /tmp/jansson-2.4.tar.gz --no-same-owner
+	(cd jansson-2.4; ./configure && make && sudo make install)
+fi
+
+if [ -d /usr/lib64 ]
+then
+	sudo cp /usr/local/lib/libjansson.so.4 /usr/lib64
+fi
 
 echo ""
 echo "*** Configure asterisk with ./configure --enable-dev-mode and install ***"
