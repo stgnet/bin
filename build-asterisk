@@ -61,6 +61,16 @@ do
 		shift
 		CERTIFIED=true
 		;;
+	-rebuild)
+		# rebuild with extreme prejudice
+		make distclean
+		make clean
+		./configure --enable-dev-mode --libdir=/usr/lib64
+		make menuselect.makeopts
+		menuselect/menuselect --enable DONT_OPTIMIZE menuselect.makeopts
+		make
+		exit
+		;;
 	*)
 		echo "ERROR: unknown argument: $1"
 		exit 1
@@ -187,7 +197,7 @@ done
 		fi
 	fi
 
-	[ -d "$DEST" ] && echo "Destination directory $DEST already exists!?" && exit 1
+	[ -d "$DEST" ] && echo "Destination directory $DEST already exists!?" && exit 91
 	mkdir $DEST
 
 	echo "Downloading Asterisk $VERSION to directory $DEST"
