@@ -1,0 +1,6 @@
+#!/bin/sh
+# edit the log for the current version
+
+REVISION="$1"
+[ -z "$REVISION" ] && REVISION="`svn info . |sed -n '/^Revision:/ s/Revision: //p'`"
+svn propedit -r $REVISION --revprop svn:log
