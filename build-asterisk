@@ -71,6 +71,12 @@ do
 		make
 		exit
 		;;
+	-vgrun)
+		# run with valgrind
+		shift
+		sudo valgrind -q --log-file=/tmp/vg.log --num-callers=50 --error-limit=no --leak-check=no --undef-value-errors=no --suppressions=/home/$USER/testsuite-valgrind/configs/valgrind.supp asterisk -c $*
+		exit
+		;;
 	*)
 		echo "ERROR: unknown argument: $1"
 		exit 1
