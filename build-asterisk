@@ -219,7 +219,7 @@ make menuselect.makeopts
 if $DONTOPT
 then
 	echo "Enabling DONT_OPTIMIZE"
-	menuselect/menuselect --enable DONT_OPTIMIZE menuselect.makeopts
+	menuselect/menuselect --enable DONT_OPTIMIZE --enable TEST_FRAMEWORK menuselect.makeopts
 fi
 
 make || exit $?
