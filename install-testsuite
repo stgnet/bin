@@ -87,7 +87,7 @@ make >make.out
 [ $? -ne 0 ] && echo "ERROR: make pjsua failed" && exit 1
 make -C pjsip-apps/build pjsua  >make-pjsua.out
 [ $? -ne 0 ] && echo "ERROR: make pjsua specifically failed" && exit 1
-sudo cp -v pjsip-apps/bin/pjsua-`uname -m`-unknown-linux-gnu /usr/sbin/pjsua
+sudo cp -v pjsip-apps/bin/pjsua-`uname -m`-*-linux-gnu /usr/sbin/pjsua
 [ $? -ne 0 ] && echo "ERROR: cp pjsua install failed" && exit 1
 sudo make -C pjsip-apps/src/python install >make-install.out
 [ $? -ne 0 ] && echo "ERROR: make pjsua python install failed" && exit 1
