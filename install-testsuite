@@ -12,11 +12,6 @@ then
 	sudo rm -rfv /usr/bin/asttest
 	sudo rm -rfv /usr/lib*/libsrtp*
 	sudo rm -rfv /usr/lib*/libpj*
-	sudo rm -rfv /usr/lib*/libspeex*
-	sudo rm -rfv /usr/lib*/libg722*
-	sudo rm -rfv /usr/lib*/libilbc*
-	sudo rm -rfv /usr/lib*/libgsm*
-	sudo rm -rfv /usr/lib*/libmilenage*
 	sudo rm -rfv /usr/lib*/libjansson*
 	sudo rm -rfv /usr/lib/python2.6/site-packages/pjsua*
 	sudo rm -rfv /usr/lib/python2.6/site-packages/_pjsua*
@@ -83,7 +78,7 @@ tar xfz sipp.tgz > tar.out
 [ $? -ne 0 ] && echo "ERROR: tar extraction failed" && exit 1
 [ ! -d $SIPP_DIR ] && echo "ERROR: tar extraction target missing" && exit 1
 cd $SIPP_DIR
-make pcapplay_ossl 2>&1 >make.out
+make pcapplay_ossl >make.out 2>&1
 [ $? -ne 0 ] && echo "ERROR: make pcapplay_ossl failed" && exit 1
 sudo cp sipp /usr/bin
 
@@ -96,7 +91,7 @@ git clone https://github.com/asterisk/pjproject pjproject >svn-co-pjproject.out
 [ $? -ne 0 ] && echo "ERROR: svn co pjproject failed" && exit 1
 cd pjproject
 [ $? -ne 0 ] && echo "ERROR: cd to pjproject failed" && exit 1
-./configure --prefix=/usr --enable-shared --disable-sound --disable-resample --disable-video --disable-opencore-amr --libdir=$SYSLIBDIR 2>&1 >configure.out
+./configure --prefix=/usr --enable-shared --disable-sound --disable-resample --disable-video --disable-opencore-amr --libdir=$SYSLIBDIR >configure.out 2>&1
 make dep > make-dep.out
 [ $? -ne 0 ] && echo "ERROR: make dep pjproject failed" && exit 1
 make >make.out
@@ -109,7 +104,7 @@ cd ..
 
 rm -rf pjsua
 [ $? -ne 0 -o -d pjsua ] && echo "ERROR: rm -rf pjsua failed" && exit 1
-svn co http://svn.pjsip.org/repos/pjproject/trunk pjsua 2>&1 >svn-co-pjsua.out
+svn co http://svn.pjsip.org/repos/pjproject/trunk pjsua >svn-co-pjsua.out 2>&1
 [ $? -ne 0 ] && echo "ERROR: svn co pjsua failed" && exit 1
 cd pjsua
 [ $? -ne 0 ] && echo "ERROR: cd to pjsua failed" && exit 1
@@ -119,33 +114,33 @@ echo "#define PJ_HAS_IPV6 1" >pjlib/include/pj/config_site.h
 #cat pjlib/include/pj/config_site_sample.h  >>pjlib/include/pj/config_site.h
 
 #./configure CFLAGS=-fPIC
-./configure --enable-shared --libdir=$SYSLIBDIR --with-external-srtp --with-external-speex --with-external-pa 2>&1 >configure.out
+./configure --enable-shared --libdir=$SYSLIBDIR --with-external-srtp --with-external-speex --with-external-pa >configure.out 2>&1
 
-make dep 2>&1 >make-dep.out
+make dep >make-dep.out 2>&1
 [ $? -ne 0 ] && echo "ERROR: make pjsua def failed" && exit 1
-make 2>&1 >make.out
+make >make.out 2>&1
 [ $? -ne 0 ] && echo "ERROR: make pjsua failed" && exit 1
-make -C pjsip-apps/build pjsua  2>&1 >make-pjsua.out
+make -C pjsip-apps/build pjsua  >make-pjsua.out 2>&1
 [ $? -ne 0 ] && echo "ERROR: make pjsua specifically failed" && exit 1
-sudo make install 2>&1 >make-install.out
+sudo make install >make-install.out 2>&1
 [ $? -ne 0 ] && echo "ERROR: make install pjsua failed" && exit 1
 
 sudo cp -v pjsip-apps/bin/pjsua-`uname -m`-*-linux-gnu /usr/sbin/pjsua
 [ $? -ne 0 ] && echo "ERROR: cp pjsua install failed" && exit 1
-sudo make -C pjsip-apps/src/python install 2>&1 >make-install.out
+sudo make -C pjsip-apps/src/python install >make-install.out 2>&1
 [ $? -ne 0 ] && echo "ERROR: make pjsua python install failed" && exit 1
 
 # some files left as root
 sudo chown -R $USER.$USER .
 
 # reinstall libraries with different configuration options (per puppet)
-./configure --enable-shared --libdir=$SYSLIBDIR --with-external-srtp --with-external-speex --with-external-pa --disable-resample 2>&1 >configure2.out
+./configure --enable-shared --libdir=$SYSLIBDIR --with-external-srtp --with-external-speex --with-external-pa --disable-resample >configure2.out 2>&1
 
-make dep 2>&1 > make-dep2.out
+make dep > make-dep2.out 2>&1
 [ $? -ne 0 ] && echo "ERROR: make dep pjsua2 failed" && exit 1
-make 2>&1 > make-pjsua2.out
+make > make-pjsua2.out 2>&1
 [ $? -ne 0 ] && echo "ERROR: make pjsua2 failed" && exit 1
-sudo make install 2>&1 >make-install2.out
+sudo make install >make-install2.out 2>&1
 [ $? -ne 0 ] && echo "ERROR: make install pjsua2 failed" && exit 1
 sudo ldconfig
 
