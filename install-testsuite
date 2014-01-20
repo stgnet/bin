@@ -226,12 +226,11 @@ then
 	wget -O /tmp/jansson-2.4.tar.gz http://www.digip.org/jansson/releases/jansson-2.4.tar.gz
 	tar xvfz /tmp/jansson-2.4.tar.gz --no-same-owner
 	(cd jansson-2.4; ./configure && make && sudo make install)
+	[ $? -ne 0 ] && echo "ERROR: libjansson compile failed" && exit 1
 fi
 
-if [ -d /usr/lib64 ]
-then
-	sudo cp /usr/local/lib/libjansson.so.4 /usr/lib64
-fi
+sudo cp /usr/local/lib/libjansson.so.4 $SYSLIBDIR
+[ $? -ne 0 ] && echo "ERROR: libjansson install failed" && exit 1
 
 echo ""
 echo "*** Asterisk testsuite dependencies installed ***"
