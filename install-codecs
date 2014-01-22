@@ -1,0 +1,33 @@
+#!/bin/sh
+# install additional codecs for testing asterisk
+
+[ `whoami` != 'root' ] && exec sudo $0
+
+AST_VER="`asterisk -V`"
+[ $? -ne 0 ] && echo "ERROR: Is Asterisk installed?" && exit 1
+[ -z "$AST_VER" ] && echo "ERROR: Unable go get Asterisk version" && exit 1
+
+NUMB=${AST_VER#Asterisk }
+VERSION=${NUMB%.*}
+
+case "$VERSION" in 
+
+	1.8) ASTERISK="ast18" ;;
+	*) echo "ERROR: Version '$VERSION' is not defined" && exit ;;
+esac
+
+PLATFORM="gcc4-glibc"
+[ `uname -m` = "x86_64" ] && PLATFORM="$PLATFORM-x86_64" 	
+CPU="pentium4"
+
+SUFFIX="$ASTERISK-$PLATFORM-$CPU.so"
+SITE="http://asterisk.hosting.lv"
+
+SYSLIBDIR="/usr/lib"
+[ `uname -m` = "x86_64" ] && SYSLIBDIR="/usr/lib64"
+
+cd $SYSLIBDIR/asterisk/modules
+
+wget "$SITE/bin/codec_g729-$SUFFIX"
+wget "$SITE/bin/codec_g723-$SUFFIX"
+
