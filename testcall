@@ -1,0 +1,33 @@
+#!/bin/sh
+# create a test call on Asterisk
+
+FROM="$1"
+TO="$2"
+CONTEXT="$3"
+
+CHANNEL="Local/$FROM@$CONTEXT"
+
+OUTDIR="/var/spool/asterisk/outgoing"
+[ ! -d $OUTDIR ] && echo "ERROR: no outgoing directory" && exit 1
+
+TMPDIR="/var/spool/asterisk/tmp"
+[ ! -d $TMPDIR ] && mkdir $TMPDIR
+
+FILE="test$$.call"
+
+TMPFILE="$TMPDIR/$FILE"
+OUTFILE="$OUTDIR/$FILE"
+
+cat <<EOF >$TMPFILE
+channel: $CHANNEL
+maxretries: 0
+waittime: 30
+callerid: 5555555555
+context: $CONTEXT
+Extension: $TO
+Priority: 1
+EOF
+
+cat $TMPFILE
+
+mv $TMPFILE $OUTFILE
