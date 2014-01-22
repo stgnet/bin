@@ -15,6 +15,9 @@
 ! which svn >/dev/null && sudo yum -y install subversion
 ! which gcc >/dev/null && sudo yum -y install gcc-c++ 
 
+SYSLIBDIR="/usr/lib"
+[ `uname -m` = "x86_64" ] && SYSLIBDIR="/usr/lib64"
+
 ASKINSTALL=true
 INSTALL=false
 VERDEST=false
@@ -63,9 +66,10 @@ do
 		;;
 	-rebuild)
 		# rebuild with extreme prejudice
-		make distclean
+		[ ! -f ./configure ] && echo "ERROR: Not in an Asterisk directory" && exit 1
 		make clean
-		./configure --enable-dev-mode --libdir=/usr/lib64
+		make distclean
+		./configure --enable-dev-mode --libdir=$SYSLIBDIR
 		make menuselect.makeopts
 		menuselect/menuselect --enable DONT_OPTIMIZE menuselect.makeopts
 		make
