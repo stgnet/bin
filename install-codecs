@@ -10,9 +10,16 @@ AST_VER="`asterisk -V`"
 NUMB=${AST_VER#Asterisk }
 VERSION=${NUMB%.*}
 
+if [ "${VERSION:0:3}" = "SVN" ]
+then
+	VERSION="${VERSION#SVN-branch-}"
+	VERSION="${VERSION%-r*}"
+fi
+
 case "$VERSION" in 
 
 	1.8) ASTERISK="ast18" ;;
+	12) ASTERISK="ast120" ;;
 	*) echo "ERROR: Version '$VERSION' is not defined" && exit ;;
 esac
 
