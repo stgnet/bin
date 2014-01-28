@@ -104,7 +104,7 @@ cd ..
 
 rm -rf pjsua
 [ $? -ne 0 -o -d pjsua ] && echo "ERROR: rm -rf pjsua failed" && exit 1
-svn co http://svn.pjsip.org/repos/pjproject/trunk pjsua >svn-co-pjsua.out 2>&1
+svn co http://svn.pjsip.org/repos/pjproject/trunk@4438 pjsua >svn-co-pjsua.out 2>&1
 [ $? -ne 0 ] && echo "ERROR: svn co pjsua failed" && exit 1
 cd pjsua
 [ $? -ne 0 ] && echo "ERROR: cd to pjsua failed" && exit 1
