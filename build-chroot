@@ -1,0 +1,25 @@
+#!/bin/sh
+
+ROOT="/tmp/chroot"
+
+set -ex
+
+mkdir -p $ROOT
+mkdir -p $ROOT/var/lib/rpm
+rpm --rebuilddb --root=$ROOT
+
+#wget http://mirror.centos.org/centos/6/os/x86_64/Packages/centos-release-6-5.el6.centos.11.1.x86_64.rpm
+
+sudo rpm -i --root=$ROOT --nodeps centos-release-*
+
+sudo yum --installroot=$ROOT install -y rpm-build yum git sudo which
+
+sudo cp $ROOT/etc/skel/.??* $ROOT/root
+
+sudo cp /etc/resolv.conf $ROOT/etc
+
+sudo mount --bind /proc $ROOT/proc
+sudo mount --bind /dev $ROOT/dev
+
+sudo xterm -e chroot $ROOT /bin/bash -l
+
