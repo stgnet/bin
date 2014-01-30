@@ -114,7 +114,7 @@ echo "#define PJ_HAS_IPV6 1" >pjlib/include/pj/config_site.h
 #cat pjlib/include/pj/config_site_sample.h  >>pjlib/include/pj/config_site.h
 
 #./configure CFLAGS=-fPIC
-./configure --enable-shared --libdir=$SYSLIBDIR --with-external-srtp --with-external-speex --with-external-pa >configure.out 2>&1
+./configure CFLAGS=-fPIC --enable-shared --libdir=$SYSLIBDIR --with-external-srtp --with-external-speex --with-external-pa >configure.out 2>&1
 
 make dep >make-dep.out 2>&1
 [ $? -ne 0 ] && echo "ERROR: make pjsua def failed" && exit 1
