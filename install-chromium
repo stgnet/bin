@@ -1,9 +1,9 @@
 # install chromium due to google obsoleting chrome on CentOS 6
+[ `whoami` != 'root' ] && exec sudo $0
 
 [ ! -f /etc/yum.repos.d/chromium-el6.repo ] && wget -O /etc/yum.repos.d/chromium-el6.repo http://people.centos.org/hughesjr/chromium/6/chromium-el6.repo
 
 [ ! -s /etc/yum.repos.d/chromium-el6.repo ] && rm /etc/yum.repos.d/chromium-el6.repo && echo ERROR: download of repo file failed && exit
 
 yum -y install chromium
-
 
