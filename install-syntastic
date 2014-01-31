@@ -1,0 +1,24 @@
+#!/bin/sh
+# Install vim plugin syntastic
+
+set -e 
+
+# install the plugin
+
+mkdir -p ~/.vim/autoload ~/.vim/bundle
+
+wget -O ~/.vim/autoload/pathogen.vim https://raw.github.com/tpope/vim-pathogen/master/autoload/pathogen.vim
+
+fgrep 'pathogen' ~/.vimrc >/dev/null || echo "execute pathogen#infect()" >> ~/.vimrc
+
+cd ~/.vim/bundle
+if [ -d syntastic ]
+then
+	cd syntastic
+	git pull
+else
+	git clone https://github.com/scrooloose/syntastic.git
+fi
+
+# make sure various lints are installed
+sudo pip install flake8
