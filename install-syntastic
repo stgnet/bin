@@ -20,5 +20,7 @@ else
 	git clone https://github.com/scrooloose/syntastic.git
 fi
 
+which pip >/dev/null || sudo yum -y install python-pip
+
 # make sure various lints are installed
 sudo pip install flake8
