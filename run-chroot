@@ -1,0 +1,51 @@
+#!/bin/sh
+set -e
+set -x
+
+[ -z "$1" ] && echo "ERROR: must specify root path" && exit 1
+ROOT=$(readlink -f $1)
+shift
+
+if [ -d $ROOT ]
+then
+    [ ! -f $ROOT/var/lib/rpm ] && echo "Found directory $ROOT but does not appear to be chroot" && exit 1
+    echo "Using existing chroot in $ROOT"
+else
+    echo "Building new chroot in $ROOT"
+
+    ! mkdir -p $ROOT && echo "ERROR: Unable to mkdir $ROOT" && exit
+    mkdir -p $ROOT/var/lib/rpm
+    #rpm --rebuilddb --root=$ROOT
+    rpm --root=$ROOT --initdb
+
+    #wget http://mirror.centos.org/centos/6/os/x86_64/Packages/centos-release-6-5.el6.centos.11.1.x86_64.rpm
+
+    #sudo rpm -i --root=$ROOT --nodeps http://mirror.centos.org/centos/6/os/x86_64/Packages/centos-release-6-5.el6.centos.11.1.x86_64.rpm
+    #sudo yum --installroot=$ROOT repolist
+
+    mkdir -p $ROOT/tmp
+    yumdownloader --destdir=$ROOT/tmp centos-release
+    cd $ROOT/tmp
+    sudo rpm -ihv --root=$ROOT --nodeps centos-release*rpm
+
+    sudo yum --installroot=$ROOT install -y bash
+
+    cp $ROOT/etc/skel/.??* $ROOT/root
+
+    cp /etc/resolv.conf $ROOT/etc
+    cp /etc/passwd $ROOT/etc
+
+    mount --bind /proc $ROOT/proc
+    mount --bind /dev $ROOT/dev
+fi
+
+
+if [ -z "$*" ]
+then
+    chroot $ROOT /bin/bash -l
+else
+    chroot $ROOT /bin/bash -l -c $*
+fi
+
+#sudo xterm -e chroot $ROOT /bin/bash -l
+
