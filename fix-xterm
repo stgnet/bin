@@ -1,6 +1,12 @@
 #!/bin/sh
-# fixes xterm color7 to be half grey instead of nearly invisible
+# fix xterm by installing terminus as the default font
+# this resolves issue where very slow redraw was occuring on xterm
 
-[ ! -f /usr/share/X11/app-defaults/XTerm ] && echo No XTerm config file - did you install xterm && exit
+# remove it if already there
+grep '^xterm\*faceName' ~/.Xresources >/dev/null && sed -i '/^xterm\*faceName/d' ~/.Xresources
 
-echo '*VT100*color7: gray50' >>/usr/share/X11/app-defaults/XTerm
+# add it
+echo 'xterm*faceName:Terminus:style=Regular:size=6' >> ~/.Xresources
+
+# load it
+xrdb -merge ~/.Xresources
