@@ -39,18 +39,18 @@ cat <<---- >$CONFDIR/virtual.conf
 #
 ExtendedStatus on
 #
-# Default ($DEFAULT)
+# Default ($DEFAULT) - requests not matching a virtual host will go here
 NameVirtualHost *:80
 NameVirtualHost *:443
 <VirtualHost *:80 *:443>
 	ServerAdmin root@$HOSTNAME
 	DocumentRoot $DEFAULT
 	ServerName *
-    <Location /server-status>
-        SetHandler server-status
+	<Location /server-status>
+	 SetHandler server-status
 		Order deny,allow
 		Allow from all
-    </Location>
+	</Location>
 </VirtualHost>
 ---
 
@@ -59,32 +59,38 @@ do
 	expr index "$DOMAIN" "." >/dev/null || continue
 	[ ! -d "$DOMAIN" ] && continue
 
-    USER=`ls -ld $DOMAIN |cut -d ' ' -f 3`
-    [ "$USER" == "root" ] && USER='apache'
+	USER=`ls -ld $DOMAIN |cut -d ' ' -f 3`
+	[ "$USER" == "root" ] && USER='apache'
 
-    if [ -f /etc/httpd/conf.d/suphp.conf ]
-    then
+	VIRTUAL=""
 
-        SUPHP="
-            suPHP_Engine off
-            AddHandler php5-script .php
-            "
-        if [ "$USER" != "apache" ]
-        then
-            SUPHP="
-            suPHP_Engine on
-            suPHP_UserGroup $USER $USER
-            AddHandler x-httpd-php .php
-            suPHP_AddHandler x-httpd-php
-            "
-        fi
-    fi
+
+	if [ -f /etc/httpd/conf.d/suphp.conf ]
+	then
+
+		VIRTUAL="
+			suPHP_Engine off
+			AddHandler php5-script .php
+			"
+		if [ "$USER" != "apache" ]
+		then
+			VIRTUAL="
+			suPHP_Engine on
+			suPHP_UserGroup $USER $USER
+			AddHandler x-httpd-php .php
+			suPHP_AddHandler x-httpd-php
+			"
+		fi
+	fi
 
 	DOCROOT="$PWD/$DOMAIN"
 	[ -h "$DOCROOT" ] && DOCROOT="`readlink -f $DOCROOT`"
 	[ ! -d "$DOCROOT" ] && continue
 
 	echo "Creating virtual config for $DOMAIN => $DOCROOT"
+
+	[ -f $WEBROOT/$DOMAIN.virtual ] && VIRTUAL="$VIRTUAL`cat $WEBROOT/$DOMAIN.virtual`
+"
 
 	DIRECTORY=""
 	if [ -f "$WEBROOT/$DOMAIN.pass" ]
@@ -126,7 +132,7 @@ do
 	DocumentRoot $DOCROOT
 	ServerName $DOMAIN
 	ServerAlias www.$DOMAIN
-$SUPHP
+$VIRTUAL
 	<Directory $DOCROOT>
 		Order deny,allow
 		Allow from all
