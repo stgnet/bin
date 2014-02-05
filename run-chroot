@@ -28,23 +28,26 @@ else
     cd $ROOT/tmp
     sudo rpm -ihv --root=$ROOT --nodeps centos-release*rpm
 
-    sudo yum --installroot=$ROOT install -y bash
+    sudo yum --installroot=$ROOT install -y yum bash
 
-    cp $ROOT/etc/skel/.??* $ROOT/root
+    sudo cp $ROOT/etc/skel/.??* $ROOT/root
 
-    cp /etc/resolv.conf $ROOT/etc
-    cp /etc/passwd $ROOT/etc
+    sudo cp /etc/resolv.conf $ROOT/etc
+    sudo cp /etc/passwd $ROOT/etc
 
-    mount --bind /proc $ROOT/proc
-    mount --bind /dev $ROOT/dev
+    sudo chown -R $USER. $ROOT
+
+    sudo mount --bind /proc $ROOT/proc
+    sudo mount --bind /dev $ROOT/dev
+
 fi
 
 
 if [ -z "$*" ]
 then
-    chroot $ROOT /bin/bash -l
+    sudo chroot $ROOT /bin/bash -l
 else
-    chroot $ROOT /bin/bash -l -c $*
+    sudo chroot $ROOT /bin/bash -l -c $*
 fi
 
 #sudo xterm -e chroot $ROOT /bin/bash -l
