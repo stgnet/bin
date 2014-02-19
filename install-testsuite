@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # asterisk testsuite - install needed dependancies
 # need epel for PyYAML
 
@@ -27,7 +27,8 @@ then
 	exit 0
 fi
 
-yum-epel
+#TODO: fix this
+#yum-epel
 
 [ ! -d testsuite ] && ba testsuite
 [ ! -d testsuite ] && echo "ERROR: testsuite not installed" && exit 1
@@ -38,9 +39,11 @@ yum-epel
 SYSLIBDIR=/usr/lib
 [ "`uname -m`" = "x86_64" ] && SYSLIBDIR=/usr/lib64
 
-# assuming CentOS for now
+# not centos
+[ ! -f /etc/redhat-release ] && sudo apt-get -y install python2.7-dev libncurses-dev libz-dev libssl-dev libxml2-dev libsqlite3-dev uuid-dev uuid libspeex-dev libspeexdsp-dev libogg-dev libvorbis-dev libasound2-dev portaudio19-dev libcurl4-openssl-dev libpq-dev unixodbc-dev libsqlite0-dev libmysqlclient15-dev libneon27-dev libgmime-2.6-dev libusb-dev liblua5.1-0-dev lua5.1 libopenh323-dev libvpb-dev libgtk2.0-dev libmysqlclient-dev libbluetooth-dev libradiusclient-ng-dev freetds-dev libsnmp-dev libiksemel-dev libcorosync-dev libnewt-dev libpopt-dev libedit-dev doxygen libjansson-dev libldap-dev subversion git libxslt1-dev libpcap0.8-dev libtiff-dev gawk
 
-sudo yum -y install automake PyYAML lua lua-devel libpcap-devel gcc-objc python-devel python-twisted git subversion libtiff-devel make wget openssl-devel ncurses-devel newt-devel libxml2-devel kernel-devel gcc gcc-c++ sqlite-devel libuuid-devel gtk2-devel gmime-devel gmime22-devel patch python-setuptools unixODBC-devel libcurl-devel libogg-devel libvorbis-devel speex-devel spandsp-devel freetds-devel net-snmp-devel iksemel-devel openais-devel popt-devel libtool-ltdl-devel libsqlite3x-devel radiusclient-ng-devel portaudio-devel postgresql-devel libresample-devel neon-devel libical-devel openldap-devel sqlite2-devel mysql-devel bluez-libs-devel jack-audio-connection-kit-devel Cython python-pip python-yaml
+# centos
+[ -f /etc/redhat-release ] && sudo apt-get -y install automake PyYAML libpcap-devel gcc-objc python-devel python-twisted git subversion libtiff-devel make wget openssl-devel ncurses-devel newt-devel libxml2-devel kernel-devel gcc gcc-c++ sqlite-devel libuuid-devel gtk2-devel gmime-devel gmime22-devel patch python-setuptools unixODBC-devel libcurl-devel libogg-devel libvorbis-devel speex-devel spandsp-devel freetds-devel net-snmp-devel iksemel-devel openais-devel popt-devel libtool-ltdl-devel libsqlite3x-devel radiusclient-ng-devel portaudio-devel postgresql-devel libresample-devel neon-devel libical-devel openldap-devel sqlite2-devel mysql-devel bluez-libs-devel jack-audio-connection-kit-devel Cython python-pip python-yaml
 
 #testsuite/contrib/scripts/install_prereq install
 
@@ -74,11 +77,11 @@ SIPP_DIR="sipp-3.3"
 
 rm -rf $SIPP_DIR
 [ $? -ne 0 ] && echo "ERROR: rm -rf $SIPP_DIR failed" && exit 1
-tar xfz sipp.tgz > tar.out
+tar xfz sipp.tgz
 [ $? -ne 0 ] && echo "ERROR: tar extraction failed" && exit 1
 [ ! -d $SIPP_DIR ] && echo "ERROR: tar extraction target missing" && exit 1
 cd $SIPP_DIR
-make pcapplay_ossl >make.out 2>&1
+make pcapplay_ossl
 [ $? -ne 0 ] && echo "ERROR: make pcapplay_ossl failed" && exit 1
 sudo cp sipp /usr/bin
 
@@ -87,14 +90,14 @@ cd ..
 # install PJPROJECT
 
 rm -rf pjproject
-git clone https://github.com/asterisk/pjproject pjproject >svn-co-pjproject.out
+git clone https://github.com/asterisk/pjproject pjproject
 [ $? -ne 0 ] && echo "ERROR: svn co pjproject failed" && exit 1
 cd pjproject
 [ $? -ne 0 ] && echo "ERROR: cd to pjproject failed" && exit 1
-./configure --prefix=/usr --enable-shared --disable-sound --disable-resample --disable-video --disable-opencore-amr --libdir=$SYSLIBDIR >configure.out 2>&1
-make dep > make-dep.out
+./configure --prefix=/usr --enable-shared --disable-sound --disable-resample --disable-video --disable-opencore-amr --libdir=$SYSLIBDIR
+make dep
 [ $? -ne 0 ] && echo "ERROR: make dep pjproject failed" && exit 1
-make >make.out
+make
 [ $? -ne 0 ] && echo "ERROR: make pjproject failed" && exit 1
 sudo make install
 sudo ldconfig
@@ -104,7 +107,7 @@ cd ..
 
 rm -rf pjsua
 [ $? -ne 0 -o -d pjsua ] && echo "ERROR: rm -rf pjsua failed" && exit 1
-svn co http://svn.pjsip.org/repos/pjproject/trunk@4438 pjsua >svn-co-pjsua.out 2>&1
+svn co http://svn.pjsip.org/repos/pjproject/trunk@4438 pjsua
 [ $? -ne 0 ] && echo "ERROR: svn co pjsua failed" && exit 1
 cd pjsua
 [ $? -ne 0 ] && echo "ERROR: cd to pjsua failed" && exit 1
@@ -114,33 +117,33 @@ echo "#define PJ_HAS_IPV6 1" >pjlib/include/pj/config_site.h
 #cat pjlib/include/pj/config_site_sample.h  >>pjlib/include/pj/config_site.h
 
 #./configure CFLAGS=-fPIC
-./configure CFLAGS=-fPIC --enable-shared --libdir=$SYSLIBDIR --with-external-srtp --with-external-speex --with-external-pa >configure.out 2>&1
+./configure CFLAGS=-fPIC --enable-shared --libdir=$SYSLIBDIR --with-external-srtp --with-external-speex --with-external-pa
 
-make dep >make-dep.out 2>&1
+make dep
 [ $? -ne 0 ] && echo "ERROR: make pjsua def failed" && exit 1
-make >make.out 2>&1
+make
 [ $? -ne 0 ] && echo "ERROR: make pjsua failed" && exit 1
-make -C pjsip-apps/build pjsua  >make-pjsua.out 2>&1
+make -C pjsip-apps/build pjsua 
 [ $? -ne 0 ] && echo "ERROR: make pjsua specifically failed" && exit 1
-sudo make install >make-install.out 2>&1
+sudo make install
 [ $? -ne 0 ] && echo "ERROR: make install pjsua failed" && exit 1
 
 sudo cp -v pjsip-apps/bin/pjsua-`uname -m`-*-linux-gnu /usr/sbin/pjsua
 [ $? -ne 0 ] && echo "ERROR: cp pjsua install failed" && exit 1
-sudo make -C pjsip-apps/src/python install >make-install.out 2>&1
+sudo make -C pjsip-apps/src/python install
 [ $? -ne 0 ] && echo "ERROR: make pjsua python install failed" && exit 1
 
 # some files left as root
 sudo chown -R $USER.$USER .
 
 # reinstall libraries with different configuration options (per puppet)
-./configure --enable-shared --libdir=$SYSLIBDIR --with-external-srtp --with-external-speex --with-external-pa --disable-resample >configure2.out 2>&1
+./configure --enable-shared --libdir=$SYSLIBDIR --with-external-srtp --with-external-speex --with-external-pa --disable-resample
 
-make dep > make-dep2.out 2>&1
+make dep
 [ $? -ne 0 ] && echo "ERROR: make dep pjsua2 failed" && exit 1
-make > make-pjsua2.out 2>&1
+make
 [ $? -ne 0 ] && echo "ERROR: make pjsua2 failed" && exit 1
-sudo make install >make-install2.out 2>&1
+sudo make install
 [ $? -ne 0 ] && echo "ERROR: make install pjsua2 failed" && exit 1
 sudo ldconfig
 
@@ -180,7 +183,7 @@ make
 [ $? -ne 0 ] && echo "ERROR: make libsrtp failed" && exit 1
 make runtest
 [ $? -ne 0 ] && echo "ERROR: make libsrtp runtest failed" && exit 1
-sudo make uninstall >/dev/null 2>/dev/null
+sudo make uninstall
 sudo make install
 [ $? -ne 0 ] && echo "ERROR: make libsrtp install failed" && exit 1
 

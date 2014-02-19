@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Build asterisk (download, compile, install) with many options
 # Usage: build-asterisk {version} {svn-revision}
 # Options:
@@ -12,8 +12,8 @@
 # If not provided an svn-revsion the latest is used
 
 # need: yum install -y make wget openssl-devel ncurses-devel  newt-devel libxml2-devel kernel-devel gcc gcc-c++ sqlite-devel libuuid-devel gtk2-devel
-! which svn >/dev/null && sudo yum -y install subversion
-! which gcc >/dev/null && sudo yum -y install gcc-c++ 
+! which svn >/dev/null && sudo apt-get -y install subversion
+! which gcc >/dev/null && sudo apt-get -y install gcc-c++ 
 
 SYSLIBDIR="/usr/lib"
 [ `uname -m` = "x86_64" ] && SYSLIBDIR="/usr/lib64"
@@ -63,6 +63,17 @@ do
 		# certified branch
 		shift
 		CERTIFIED=true
+		;;
+	-remenu)
+		# rebuild with extreme prejudice
+		[ ! -f ./configure ] && echo "ERROR: Not in an Asterisk directory" && exit 1
+		make clean
+		make distclean
+		./configure --enable-dev-mode --libdir=$SYSLIBDIR
+		#make menuselect.makeopts
+		#menuselect/menuselect --enable DONT_OPTIMIZE menuselect.makeopts
+		make menuselect
+		exit
 		;;
 	-rebuild)
 		# rebuild with extreme prejudice
@@ -225,14 +236,14 @@ CONFOPTS="--enable-dev-mode"
 ./configure $CONFOPTS || exit $?
 
 #make menuselect || exit $?
-make menuselect.makeopts
+make -j3 menuselect.makeopts
 if $DONTOPT
 then
 	echo "Enabling DONT_OPTIMIZE"
 	menuselect/menuselect --enable DONT_OPTIMIZE --enable TEST_FRAMEWORK menuselect.makeopts
 fi
 
-make || exit $?
+make -j3 || exit $?
 
 if $ASKINSTALL 
 then

@@ -1,0 +1,12 @@
+#!/bin/sh
+set -ex
+
+rm -rf dahdi-linux
+git clone git://git.asterisk.org/dahdi/linux dahdi-linux
+cd dahdi-linux
+make
+sudo make install
+# don't need to install configs to get deps
+# sudo make config
+cd ..
+

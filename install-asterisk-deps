@@ -1,0 +1,55 @@
+#!/bin/sh
+# install all asterisk dependencies to enable all modules
+set -ex
+
+# get kernel version
+KREV=`uname -r`
+
+# not redhat
+if [ ! -f /etc/redhat-release ]
+then
+	sudo apt-get -y install autoconf linux-headers-${KREV%-*}  
+
+	[ -s /lib/modules/${KREV}/source ] || sudo ln -s /usr/src/linux-headers-${KREV} /lib/modules/${KREV}/source
+fi
+
+
+# is redhat
+[ -f /etc/redhat-release ] && sudo apt-get -y install alsa-lib-devel mISDN-devel
+
+rm -rf asterisk-support
+mkdir asterisk-support
+cd asterisk-support
+
+svn co http://svn.digium.com/svn/nbs/trunk nbs
+cd nbs
+make
+sudo make install
+cd ..
+
+git clone git://git.misdn.eu/mISDN.git/ misdn
+cd misdn
+#make
+cp mISDN.cfg.default standalone/mISDN.cfg
+./configure
+autoreconf
+make modules
+sudo make modules_install
+cd ..
+
+git clone git://git.misdn.eu/mISDNuser.git/ misdnuser
+cd misdnuser
+make
+./configure
+make
+sudo make install
+
+git clone git://git.asterisk.org/dahdi/linux dahdi-linux
+cd dahdi-linux
+make
+sudo make install
+# don't need to install configs to get deps
+# sudo make config
+cd ..
+
+echo "*** ASTERISK DEPENDENCIES INSTALLED ***"
