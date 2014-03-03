@@ -1,0 +1,16 @@
+#!/bin/bash
+set -ex
+if [ `uname -m` == "x86_64" ]
+then
+	sudo yum install http://linuxdownload.adobe.com/adobe-release/adobe-release-x86_64-1.0-1.noarch.rpm
+	sudo rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-adobe-linux
+else
+	udio yum install http://linuxdownload.adobe.com/adobe-release/adobe-release-i386-1.0-1.noarch.rpm
+	sudo rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-adobe-linux
+fi
+
+sudo yum check-update
+
+sudo yum remove flash-plugin nspluginwrapper*
+sudo yum install flash-plugin nspluginwrapper alsa-plugins-pulseaudio libcurl
+
