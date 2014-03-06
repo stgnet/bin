@@ -13,29 +13,31 @@ in bash, although that is not specifically a requirement for inclusion.
 Requirements
 ------------
 
-* a RedHat style system with yum (this could be made flexible later)
+* a RedHat style system with yum (some scripts now work on Ubuntu/Debian) 
 * bash (well, yeah)
 * sed (used for mangling config files)
-* root user access (some can be used from user account - like sshkey)
+* root user access via sudo
+* In most cases dependencies are checked and the script attempts to install
+  what it needs.  If this doesn't work for you, please let me know.
 
 Installation
 ------------
 
-To install these utilities, log in (or su) as root, insure you are in /root,
-and git clone this project like this:
+To install these utilities, log in to your user account, insure you are
+in the ~ (home) directory, and git clone this project like this:
 
-	cd /root
+	cd ~
 	git clone http://github.com/stgnet/bin
 
-Then just run the scripts present in the directory as needed.  If you get an
-error that the script is not found, you didn't login as root and/or
-/root/bin isn't in your $PATH - repeat the `su -` to fix.
+Then just run the scripts as needed.  If you get an error that the script
+is not found, you don't have $HOME/bin appended to your path or you need
+to log in again for bash to realize it's now there.
 
 Scripts
 -------
 
-* fix-resolv - add public dns servers  to /etc/resolv.conf to fix errors
-		This can also be installed in crontab to patch after change
+* install-whatever - install a component that needs more than just yum
+* build-asterisk - tool for building Asterisk from source with dev options
 * fix-date - force an immediate ntpd resync to pool.ntp.org
 * sshkey - install key on remote system for no-prompt ssh/scp/rsync access
 * webconf - auto build apache virtual.conf from /var/www/domain.com directories
@@ -43,7 +45,7 @@ Scripts
 LICENSE
 -------
 
-Public Domain
+Public Domain - why? Becuase you should be free to do whatever you want with these.
 
 * Please share, fork, and contribute improvements
 * If you don't like this, let me know why: scott@griepentrog.com or @stgnet
