@@ -1,11 +1,11 @@
 #!/bin/sh
-# Install vim plugin syntastic
+# Install or update vim plugin syntastic
 set -ex
 
-test -f /etc/redhat-release && alias pkgr=yum || alias pkgr=apt-get
+test -f /etc/redhat-release && PKGR=yum || PKGR=apt-get
 
 # first insure vim is installed
-which vim || sudo pkgr -get -y install vim
+which vim || sudo $PKGR -y install vim
 
 # install the plugin
 
@@ -24,7 +24,10 @@ else
 	git clone https://github.com/scrooloose/syntastic.git
 fi
 
-which pip >/dev/null || sudo pkgr -get -y install python-pip
+# pip package is in epel on rhel based systems
+[ -f /etc/redhat-release -a ! -f /etc/yum.repos.d/epel ] && yum-epel
+
+which pip >/dev/null || sudo $PKGR -y install python-pip
 
 # make sure various lints are installed
 sudo pip install flake8
