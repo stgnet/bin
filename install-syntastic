@@ -7,6 +7,9 @@ test -f /etc/redhat-release && PKGR=yum || PKGR=apt-get
 # first insure vim is installed
 which vim || sudo $PKGR -y install vim
 
+# and wget
+which wget || sudo $PKGR -y install wget
+
 # install the plugin
 
 mkdir -p ~/.vim/autoload ~/.vim/bundle
