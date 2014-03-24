@@ -11,12 +11,14 @@
 # If not supplied with a version a list is given to choose from
 # If not provided an svn-revsion the latest is used
 
+test -f /etc/redhat-release && PKGR=yum || PKGR=apt-get
+which svn || sudo $PKGR -y install subversion
+which gcc || sudo $PKGR -y install gcc-c++
+
 # need: yum install -y make wget openssl-devel ncurses-devel  newt-devel libxml2-devel kernel-devel gcc gcc-c++ sqlite-devel libuuid-devel gtk2-devel
-! which svn >/dev/null && sudo apt-get -y install subversion
-! which gcc >/dev/null && sudo apt-get -y install gcc-c++ 
 
 SYSLIBDIR="/usr/lib"
-[ `uname -m` = "x86_64" ] && SYSLIBDIR="/usr/lib64"
+[ `uname -m` = "x86_64" ] && [ -d /usr/lib64 ] && SYSLIBDIR="/usr/lib64"
 
 ASKINSTALL=true
 INSTALL=false
@@ -236,14 +238,14 @@ CONFOPTS="--enable-dev-mode"
 ./configure $CONFOPTS || exit $?
 
 #make menuselect || exit $?
-make -j3 menuselect.makeopts
+make menuselect.makeopts
 if $DONTOPT
 then
 	echo "Enabling DONT_OPTIMIZE"
-	menuselect/menuselect --enable DONT_OPTIMIZE --enable TEST_FRAMEWORK menuselect.makeopts
+	menuselect/menuselect --enable DONT_OPTIMIZE --enable TEST_FRAMEWORK --enable DO_CRASH menuselect.makeopts
 fi
 
-make -j3 || exit $?
+make || exit $?
 
 if $ASKINSTALL 
 then
