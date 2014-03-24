@@ -12,8 +12,8 @@
 # If not provided an svn-revsion the latest is used
 
 test -f /etc/redhat-release && PKGR=yum || PKGR=apt-get
-which svn || sudo $PKGR -y install subversion
-which gcc || sudo $PKGR -y install gcc-c++
+which svn >/dev/null || sudo $PKGR -y install subversion
+which gcc >/dev/null || sudo $PKGR -y install gcc-c++
 
 # need: yum install -y make wget openssl-devel ncurses-devel  newt-devel libxml2-devel kernel-devel gcc gcc-c++ sqlite-devel libuuid-devel gtk2-devel
 
@@ -186,8 +186,15 @@ done
 #else
 
 	# get matching branch from svn
-	VERSIONPATH="$VERSION"
-	[ "$VERSION" != "trunk" ] && VERSIONPATH="branches/$VERSION"
+	TOPDIR="${VERSION%%/*}"
+	case "$TOPDIR" in
+	"trunk" | "team" | "certified")
+		VERSIONPATH="$VERSION"
+		;;
+	*)
+		VERSIONPATH="branches/$VERSION"
+		;;
+	esac
 	if $CERTIFIED
 	then
 		VERSIONPATH="certified/$VERSIONPATH"
@@ -199,6 +206,8 @@ done
 		# user has digium svn access
 		SVNURL="https://origsvn.digium.com/$FULLPATH"
 	fi
+	# use just the last portion of the path as the dest dir
+	VERSION="${VERSION##*/}"
 
 	# get the revision number
 	if [ -z "$SVNREV" ]
