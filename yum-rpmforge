@@ -1,23 +1,25 @@
 #!/bin/sh
 # Install RPMFORGE for this version
+[ `whoami` != 'root' ] && exec sudo $0
 
-[ ! -f /etc/redhat-release ] && echo "ERROR: not a RedHat/Fedora/CentOS system" && exit
+[ ! -f /etc/redhat-release ] && echo "ERROR: not a RedHat/Fedora/CentOS system" && exit 1
 
 RHVER="`cat /etc/redhat-release`"
 
-VERSION=""
-[ "$RHVER" = "CentOS release 6.3 (Final)" ] && VERSION="6"
-[ "$RHVER" = "CentOS release 6.4 (Final)" ] && VERSION="6"
-
-[ -z "$VERSION" ] && echo "ERROR: version not implemented in script - please fix:" && echo $RHVER && exit
+VERSION="${RHVER#* release }"
+VERSION="${VERSION%.*}"
 
 RPM=""
 [ "$VERSION" = "6" ] && RPM="rpmforge-release-0.5.2-2.el6.rf"
 
+[ -z "$RPM" ] && echo "ERROR: version $VERSION not implemented" && exit 1
+
 PLATFORM="`uname -m`"
+[ "$PLATFORM" = "i686" ] && PLATFORM="x86_64"
+[ "$PLATFORM" = "i586" ] && PLATFORM="i386"
 
 BASE="http://packages.sw.be/rpmforge-release"
 
 rpm --import http://apt.sw.be/RPM-GPG-KEY.dag.txt
-rpm -Uvh $BASE/$RPM.$PLATFORM.rpm
+yum -y install $BASE/$RPM.$PLATFORM.rpm
 yum -y update rpmforge-release

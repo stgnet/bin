@@ -1,0 +1,20 @@
+#!/bin/sh
+# Install or update vim plugin syntastic
+set -ex
+[ `whoami` != 'root' ] && exec sudo $0
+
+test -f /etc/redhat-release && PKGR=yum || PKGR=apt-get
+
+# need rpmforge
+yum-rpmforge
+
+# from http://wiki.centos.org/TipsAndTricks/MultimediaOnCentOS
+if [ -f /etc/redhat-release ]
+then
+	yum install compat-libstdc++-33 libdvdcss libdvdread libdvdplay libdvdnav lsdvd libquicktime
+	yum install flash-plugin mplayerplug-in mplayer mplayer-gui gstreamer-ffmpeg gstreamer-plugins-bad gstreamer-plugins-ugly
+
+	# this is broken
+	#yum install vlc
+fi
+	
