@@ -1,12 +1,15 @@
 #!/bin/sh
 # fix xterm by installing terminus as the default font
-# this resolves issue where very slow redraw was occuring on xterm
+# this works around issue with very slow redraw
 
-# remove it if already there
-grep '^xterm\*faceName' ~/.Xresources >/dev/null && sed -i '/^xterm\*faceName/d' ~/.Xresources
+# fix it only on this session by loading a dummy config
+# this way any other instances that happen to share the
+# same $HOME are not affected on reboot
 
-# add it
-echo 'xterm*faceName:Terminus:style=Regular:size=6' >> ~/.Xresources
+# after running this, only newly spawned xterm's will be 'fixed'
 
-# load it
-xrdb -merge ~/.Xresources
+echo 'xterm*faceName:Terminus:style=Regular:size=6' > /tmp/xres.$$
+
+xrdb -merge /tmp/xres.$$
+
+rm -f /tmp/xres.$$
