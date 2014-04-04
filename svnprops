@@ -1,3 +1,13 @@
+if [ -d $1 ]
+then
+	find $1 | while read FILE
+	do
+		svn propset svn:mime-type text/plain $FILE
+		svn propset svn:eol-style native $FILE
+		svn propset svn:keywords 'Author Date Id Revision' $FILE
+	done
+	exit 0
+fi
 svn propset svn:mime-type text/plain $*
 svn propset svn:eol-style native $*
 svn propset svn:keywords 'Author Date Id Revision' $*
