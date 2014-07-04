@@ -1,0 +1,7 @@
+# install ntfs from epel
+[ `whoami` != 'root' ] && exec sudo env PATH=$PATH $0
+
+[ ! -f /etc/yum.repos.d/epel.repo ] && yum-epel
+
+yum -y install ntfs-3g
+
