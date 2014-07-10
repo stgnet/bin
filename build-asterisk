@@ -11,11 +11,7 @@
 # If not supplied with a version a list is given to choose from
 # If not provided an svn-revsion the latest is used
 
-test -f /etc/redhat-release && PKGR=yum || PKGR=apt-get
-which svn >/dev/null || sudo $PKGR -y install subversion
-which gcc >/dev/null || sudo $PKGR -y install gcc-c++
-
-# need: yum install -y make wget openssl-devel ncurses-devel  newt-devel libxml2-devel kernel-devel gcc gcc-c++ sqlite-devel libuuid-devel gtk2-devel
+install-packages subversion gcc-c++ ncurses-devel libxml2-devel make wget openssl-devel newt-devel kernel-devel gcc gcc-c++ sqlite-devel libuuid-devel gtk2-devel jansson-devel
 
 SYSLIBDIR="/usr/lib"
 [ `uname -m` = "x86_64" ] && [ -d /usr/lib64 ] && SYSLIBDIR="/usr/lib64"
@@ -84,7 +80,7 @@ do
 		make distclean
 		./configure --enable-dev-mode --libdir=$SYSLIBDIR
 		make menuselect.makeopts
-		menuselect/menuselect --enable DONT_OPTIMIZE menuselect.makeopts
+		menuselect/menuselect --enable DONT_OPTIMIZE --enable TEST_FRAMEWORK  menuselect.makeopts
 		make
 		exit
 		;;
