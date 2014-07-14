@@ -11,6 +11,7 @@
 # If not supplied with a version a list is given to choose from
 # If not provided an svn-revsion the latest is used
 
+[ -f /etc/redhat-release ] && [ ! -f /etc/yum.repos.d/epel.repo ] && echo "WARNING: epel required for libjansson" && yum-epel
 install-packages subversion gcc-c++ ncurses-devel libxml2-devel make wget openssl-devel newt-devel kernel-devel gcc gcc-c++ sqlite-devel libuuid-devel gtk2-devel jansson-devel
 
 SYSLIBDIR="/usr/lib"
