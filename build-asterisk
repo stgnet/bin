@@ -14,6 +14,14 @@
 [ -f /etc/redhat-release ] && [ ! -f /etc/yum.repos.d/epel.repo ] && echo "WARNING: epel required for libjansson" && yum-epel
 install-packages subversion gcc-c++ ncurses-devel libxml2-devel make wget openssl-devel newt-devel kernel-devel gcc gcc-c++ sqlite-devel libuuid-devel gtk2-devel jansson-devel
 
+configure_menuselect()
+{
+	echo "Configuring menuselect options"
+	make menuselect.makeopts
+	menuselect/menuselect --enable DONT_OPTIMIZE --enable TEST_FRAMEWORK --enable DO_CRASH --enable BETTER_BACKTRACES menuselect.makeopts
+}
+
+
 SYSLIBDIR="/usr/lib"
 [ `uname -m` = "x86_64" ] && [ -d /usr/lib64 ] && SYSLIBDIR="/usr/lib64"
 
@@ -53,24 +61,19 @@ do
 		shift
 		VERDEST=true
 		;;
-	-o)
-		# optimize (default is don't optimize)
-		shift
-		DONTOPT=false
-		;;
 	-c)
 		# certified branch
 		shift
 		CERTIFIED=true
 		;;
 	-remenu)
-		# rebuild with extreme prejudice
+		# reset everything, stop at menuselect
 		[ ! -f ./configure ] && echo "ERROR: Not in an Asterisk directory" && exit 1
 		make clean
 		make distclean
 		./configure --enable-dev-mode --libdir=$SYSLIBDIR
-		#make menuselect.makeopts
-		#menuselect/menuselect --enable DONT_OPTIMIZE menuselect.makeopts
+		configure_menuselect
+		# 
 		make menuselect
 		exit
 		;;
@@ -80,8 +83,7 @@ do
 		make clean
 		make distclean
 		./configure --enable-dev-mode --libdir=$SYSLIBDIR
-		make menuselect.makeopts
-		menuselect/menuselect --enable DONT_OPTIMIZE --enable TEST_FRAMEWORK  menuselect.makeopts
+		configure_menuselect
 		make
 		exit
 		;;
@@ -244,12 +246,7 @@ CONFOPTS="--enable-dev-mode"
 ./configure $CONFOPTS || exit $?
 
 #make menuselect || exit $?
-make menuselect.makeopts
-if $DONTOPT
-then
-	echo "Enabling DONT_OPTIMIZE"
-	menuselect/menuselect --enable DONT_OPTIMIZE --enable TEST_FRAMEWORK --enable DO_CRASH menuselect.makeopts
-fi
+configure_menuselect
 
 make || exit $?
 
