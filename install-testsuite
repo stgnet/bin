@@ -190,7 +190,7 @@ sudo make uninstall
 sudo make install
 [ $? -ne 0 ] && echo "ERROR: make libsrtp install failed" && exit 1
 
-cd ..
+#cd ..
 
 # now at testsuite-support
 
