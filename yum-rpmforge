@@ -10,6 +10,7 @@ VERSION="${RHVER#* release }"
 VERSION="${VERSION%.*}"
 
 RPM=""
+[ "$VERSION" = "7.0" ] && RPM="rpmforge-release-0.5.3-1.el7.rf"
 [ "$VERSION" = "6" ] && RPM="rpmforge-release-0.5.2-2.el6.rf"
 
 [ -z "$RPM" ] && echo "ERROR: version $VERSION not implemented" && exit 1
