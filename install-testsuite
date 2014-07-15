@@ -76,16 +76,15 @@ wget -O sipp.tgz http://downloads.sourceforge.net/project/sipp/sipp/3.3/sipp-3.3
 
 SIPP_DIR="sipp-3.3"
 
-# disabling due to not working
-#rm -rf $SIPP_DIR
-#[ $? -ne 0 ] && echo "ERROR: rm -rf $SIPP_DIR failed" && exit 1
-#tar xfz sipp.tgz
-#[ $? -ne 0 ] && echo "ERROR: tar extraction failed" && exit 1
-#[ ! -d $SIPP_DIR ] && echo "ERROR: tar extraction target missing" && exit 1
-#cd $SIPP_DIR
-#make pcapplay_ossl
-#[ $? -ne 0 ] && echo "ERROR: make pcapplay_ossl failed" && exit 1
-#sudo cp sipp /usr/bin
+rm -rf $SIPP_DIR
+[ $? -ne 0 ] && echo "ERROR: rm -rf $SIPP_DIR failed" && exit 1
+tar xfz sipp.tgz
+[ $? -ne 0 ] && echo "ERROR: tar extraction failed" && exit 1
+[ ! -d $SIPP_DIR ] && echo "ERROR: tar extraction target missing" && exit 1
+cd $SIPP_DIR
+make pcapplay_ossl
+[ $? -ne 0 ] && echo "ERROR: make pcapplay_ossl failed" && exit 1
+sudo cp sipp /usr/bin
 
 cd ..
 
