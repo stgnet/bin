@@ -1,0 +1,4 @@
+#!/bin/bash
+# fix the freepbx retreive_conf to force asterisk 12.4
+[ `whoami` != 'root' ] && exec sudo $0
+sed -i 's/engine_getinfo();/engine_getinfo();\n$engineinfo["engine"]="asterisk"; $engineinfo["version"]="12.4.0";/' /var/lib/asterisk/bin/retrieve_conf
