@@ -25,7 +25,7 @@ else
 	for pkg in $*
 	do
 		deb="${pkg#*/}"
-		PKGS="$PKGS $rh"
+		dpkg-query -l "$deb" >/dev/null || PKGS="$PKGS $deb"
 	done
-	sudo apt-get -y install $PKGS
+	[ ! -z "$PKGS" ] && sudo apt-get -y install $PKGS
 fi
