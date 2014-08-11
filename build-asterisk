@@ -19,7 +19,7 @@ configure_menuselect()
 {
 	echo "Configuring menuselect options"
 	make menuselect.makeopts
-	menuselect/menuselect --enable REF_DEBUG --enable DONT_OPTIMIZE --enable TEST_FRAMEWORK --enable DO_CRASH --enable BETTER_BACKTRACES menuselect.makeopts
+	menuselect/menuselect --enable REF_DEBUG --enable DONT_OPTIMIZE --enable TEST_FRAMEWORK --enable DO_CRASH --enable BETTER_BACKTRACES --enable EXTRA-SOUNDS-EN-GSM menuselect.makeopts
 }
 
 
