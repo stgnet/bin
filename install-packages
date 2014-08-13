@@ -1,0 +1,53 @@
+#!/bin/bash
+# install an arbitrary list of packages
+#
+# for example:
+#   install-packages lynx ncurses-devel/ncurses-dev
+#
+# if two packages are given with a / separator,
+# the left one is the redhat style package name, and
+# the right one is the debian style package name
+#
+# if the package is already installed, no attempt to
+# install or update is made
+
+PKGS=""
+SINGLE=""
+
+if [ "$1" = "-1" ]
+then
+	SINGLE=1
+fi
+
+if [ -f /etc/redhat-release ]
+then
+	for pkg in $*
+	do
+		rh="${pkg%/*}"
+		rpm -q $rh >/dev/null || PKGS="$PKGS $rh"
+	done
+	if [ $SINGLE ]
+	then
+		for PKG in $PKGS
+		do
+			sudo yum -y install $PKG
+		done
+	else
+		[ ! -z "$PKGS" ] && sudo yum -y install $PKGS
+	fi
+else
+	for pkg in $*
+	do
+		deb="${pkg#*/}"
+		dpkg-query -l "$deb" >/dev/null || PKGS="$PKGS $deb"
+	done
+	if [ $SINGLE ]
+	then
+		for PKG in $PKGS
+		do
+			sudo apt-get -y install $PKG
+		done
+	else
+		[ ! -z "$PKGS" ] && sudo apt-get -y install $PKGS || install-packages -1 $PKGS
+	fi
+fi
