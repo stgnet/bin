@@ -16,9 +16,13 @@
 # /var/www/foobar.allow - list of IP addresses one per line, bypass pw auth
 # /var/www/foobar.options - add "indexes" to allow auto indexes, etc
 
+# this really has to be run as root
+[ `whoami` != 'root' ] && exec sudo env PATH=$PATH $0
+
 WEBROOT="/var/www"
 DEFAULT="/var/www/html"
 CONFDIR="/etc/httpd/conf.d"
+
 
 [ ! -f /usr/sbin/httpd ] && yum -y install httpd
 [ ! -f /usr/bin/php ] && yum -y install php
