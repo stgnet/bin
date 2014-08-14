@@ -18,6 +18,7 @@ then
 	for pkg in $*
 	do
 		rh="${pkg%/*}"
+		[ -z "$rh" ] && continue
 		rpm -q $rh >/dev/null || PKGS="$PKGS $rh"
 	done
 	[ ! -z "$PKGS" ] && sudo yum -y install $PKGS
