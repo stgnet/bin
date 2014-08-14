@@ -16,9 +16,13 @@
 # /var/www/foobar.allow - list of IP addresses one per line, bypass pw auth
 # /var/www/foobar.options - add "indexes" to allow auto indexes, etc
 
+# this really has to be run as root
+[ `whoami` != 'root' ] && exec sudo env PATH=$PATH $0
+
 WEBROOT="/var/www"
 DEFAULT="/var/www/html"
 CONFDIR="/etc/httpd/conf.d"
+
 
 [ ! -f /usr/sbin/httpd ] && yum -y install httpd
 [ ! -f /usr/bin/php ] && yum -y install php
@@ -85,6 +89,10 @@ do
 
 	DOCROOT="$PWD/$DOMAIN"
 	[ -h "$DOCROOT" ] && DOCROOT="`readlink -f $DOCROOT`"
+	if [[ $DOCROOT != *$PWD* ]]
+	then
+		[ -f /selinux/enforce -a `cat /selinux/enforce` != 0 ] && echo "WARNING: $DOCROOT is not in $PWD and SELINUX is enabled!!!"
+	fi
 	[ ! -d "$DOCROOT" ] && continue
 
 	echo "Creating virtual config for $DOMAIN => $DOCROOT"
