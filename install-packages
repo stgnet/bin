@@ -24,6 +24,7 @@ then
 	for pkg in $*
 	do
 		rh="${pkg%/*}"
+		[ -z "$rh" ] && continue
 		rpm -q $rh >/dev/null || PKGS="$PKGS $rh"
 	done
 	if [ $SINGLE ]

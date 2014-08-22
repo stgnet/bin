@@ -12,14 +12,13 @@
 # If not provided an svn-revsion the latest is used
 
 [ -f /etc/redhat-release ] && [ ! -f /etc/yum.repos.d/epel.repo ] && echo "WARNING: epel required for libjansson" && yum-epel
-
-install-packages subversion gcc-c++/gcc-4.4 ncurses-devel/libncurses-dev libxml2-devel/libxml2-dev make wget openssl-devel/libcurl4-openssl-dev newt-devel/libnewt-dev kernel-devel/ sqlite-devel/libsqlite-dev libuuid-devel/uuid-dev gtk2-devel/libgtk2.0-dev jansson-devel/libjansson-dev binutils-devel/binutils-dev
+install-packages subversion gcc-c++/gcc-4.4 ncurses-devel/libncurses-dev libxml2-devel/libxml2-dev make wget openssl-devel/libcurl4-openssl-dev newt-devel/libnewt-dev kernel-devel/ sqlite-devel/libsqlite-dev libuuid-devel/uuid-dev gtk2-devel/libgtk2.0-dev jansson-devel/libjansson-dev binutils-devel/binutils-dev /pkg-config
 
 configure_menuselect()
 {
 	echo "Configuring menuselect options"
 	make menuselect.makeopts
-	menuselect/menuselect --enable REF_DEBUG --enable DONT_OPTIMIZE --enable TEST_FRAMEWORK --enable DO_CRASH --enable BETTER_BACKTRACES menuselect.makeopts
+	menuselect/menuselect --enable REF_DEBUG --enable DONT_OPTIMIZE --enable TEST_FRAMEWORK --enable DO_CRASH --enable BETTER_BACKTRACES --enable EXTRA-SOUNDS-EN-GSM menuselect.makeopts
 }
 
 
