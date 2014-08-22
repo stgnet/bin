@@ -237,6 +237,10 @@ fi
 sudo cp /usr/local/lib/libjansson.so.4 $SYSLIBDIR
 [ $? -ne 0 ] && echo "ERROR: libjansson install failed" && exit 1
 
+
+# make sure zope.interface is updated (keeps the errors at bay)
+sudo pip install --upgrade zope.interface
+
 echo ""
 echo "*** Asterisk testsuite dependencies installed ***"
 echo ""
