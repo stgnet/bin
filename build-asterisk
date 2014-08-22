@@ -271,8 +271,8 @@ then
 	if [ -z "$INSTALL_PATH" ]
 	then
 		# presume that root installation is necessary using sudo
-		sudo make uninstall 
-		sudo make install
+		while ! sudo make uninstall ; do echo -en '\007'; done
+		while ! sudo make install ; do echo -en '\007'; done
 		#[ ! -f /etc/asterisk/extensions.conf ] && sudo make samples
 		if [ `uname -m` = "x86_64" ] 
 		then
