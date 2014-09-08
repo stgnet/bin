@@ -1,0 +1,28 @@
+#!/bin/sh
+set -ex
+
+count_version()
+{
+	while read VERSION
+	do
+		URL="http://downloads.asterisk.org/pub/telephony/asterisk/releases/$VERSION.tar.gz"
+
+		wget -O $VERSION.tar.gz $URL
+
+		tar xvf $VERSION.tar.gz
+
+		[ ! -d $VERSION ] && exit 1
+
+		find $VERSION -name '*.c' -o -name '*.h' |xargs wc -l > $VERSION.count
+
+		rm -rf $VERSION $VERSION.tar.gz
+
+		echo "$VERSION,`tail -1 $VERSION.count |sed 's/ total//'`"  >> asterisk-line-count.csv
+
+	done
+}
+
+rm -f asterisk-line-count.csv
+
+lynx -dump http://downloads.asterisk.org/pub/telephony/asterisk/releases/ |grep 'asterisk-[0-9].*\.tar\.gz ' |sed -e 's/^.*asterisk/asterisk/g' -e 's/.tar.gz .*//g' | count_version
+
