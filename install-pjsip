@@ -1,6 +1,8 @@
 #!/bin/sh
 # install pjsip directly from teluu trunk
 
+install-packages speex-devel/libspeex-dev
+
 LIBDIR=/usr/lib
 [ `uname -m` = "x86_64" ] && [ -d /usr/lib64 ] && LIBDIR="/usr/lib64"
 
