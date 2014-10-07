@@ -44,12 +44,12 @@ cat <<---- >$CONFDIR/virtual.conf
 ExtendedStatus on
 #
 # Default ($DEFAULT) - requests not matching a virtual host will go here
-NameVirtualHost *:80
-NameVirtualHost *:443
+#NameVirtualHost *:80
+#NameVirtualHost *:443
 <VirtualHost *:80 *:443>
 	ServerAdmin root@$HOSTNAME
 	DocumentRoot $DEFAULT
-	ServerName *
+#	ServerName *
 	<Location /server-status>
 	 SetHandler server-status
 		Order deny,allow
@@ -153,4 +153,4 @@ $DIRECTORY
 done
 
 # special restart sequence to insure restart finishes if run FROM httpd
-bash -c 'sleep 3;trap echo SIGTERM;service httpd stop;sleep 1;service httpd start' >/dev/null  &
+bash -c 'sleep 3;trap echo SIGTERM;service httpd stop;sleep 1;service httpd start || service httpd status >/dev/tty' >/dev/null  &
