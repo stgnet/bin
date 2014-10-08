@@ -1,7 +1,8 @@
 #!/bin/sh
 # install pjsip directly from teluu trunk
 
-install-packages git speex-devel/libspeex-dev libsrtp-devel/ portaudio-devel/
+[ ! -f /etc/yum.repos.d/epel.repo ] && install-packages epel-release
+install-packages git subversion gcc-c++/gcc-4.4 speex-devel/libspeex-dev libsrtp-devel/ portaudio-devel/
 
 set -ex
 
