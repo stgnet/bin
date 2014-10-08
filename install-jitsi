@@ -1,0 +1,17 @@
+#!/bin/sh
+# install jitsi from their yum repo
+
+
+if [ -d /etc/yum.repos.d -a ! -f /etc/yum.repos.d/jitsi.repo ]
+then
+	cat <<---- >/etc/yum.repos.d/jitsi.repo
+[jitsi]
+name=Jitsi
+baseurl=https://download.jitsi.org/jitsi/rpm/
+enabled=1
+gpgcheck=0
+---
+fi
+
+install-packages jitsi
+
