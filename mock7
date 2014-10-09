@@ -1,0 +1,16 @@
+#!/bin/sh
+# get a mock centos7 shell
+
+[ `uname -m` != "x86_64" ] && echo "Error: CentOS 7 requires x86_64" && exit 1
+
+install-packages mock
+
+[ ! -f /etc/mock/epel-7-x86_64.cfg ] && echo "Error: did not find epel-7-x86_64.cfg in /etc/mock, maybe udpate mock?" && exit 1
+
+grep "^mock:.*$USER" /etc/group || sudo usermod -a -G mock $USER
+
+[ "$1" = "-e" ] && mock -r epel-7-x86_64 --clean && exit
+
+set -ex
+[ ! -d /var/lib/mock/epel-7-x86_64 ] && mock -r epel-7-x86_64 --init && mock -r epel-7-x86_64 --install yum
+mock -r epel-7-x86_64 --shell

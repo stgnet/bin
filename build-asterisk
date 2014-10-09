@@ -12,13 +12,33 @@
 # If not provided an svn-revsion the latest is used
 
 [ -f /etc/redhat-release ] && [ ! -f /etc/yum.repos.d/epel.repo ] && echo "WARNING: epel required for libjansson" && yum-epel
-install-packages subversion gcc-c++/gcc-4.4 ncurses-devel/libncurses-dev libxml2-devel/libxml2-dev make wget openssl-devel/libcurl4-openssl-dev newt-devel/libnewt-dev kernel-devel/ sqlite-devel/libsqlite-dev libuuid-devel/uuid-dev gtk2-devel/libgtk2.0-dev jansson-devel/libjansson-dev binutils-devel/binutils-dev /pkg-config
+install-packages dmidecode subversion gcc-c++/gcc-4.4 ncurses-devel/libncurses-dev libxml2-devel/libxml2-dev make wget openssl-devel/libcurl4-openssl-dev newt-devel/libnewt-dev kernel-devel/ sqlite-devel/libsqlite-dev libuuid-devel/uuid-dev gtk2-devel/libgtk2.0-dev jansson-devel/libjansson-dev binutils-devel/binutils-dev /pkg-config
+
+install_tls()
+{
+	[ ! -f ./contrib/scripts/ast_tls_cert ] && echo "ERROR: Not in an Asterisk directory" && exit 1
+	[ ! -d /etc/asterisk/keys ] && mkdir /etc/asterisk/keys
+	./contrib/scripts/ast_tls_cert -C $HOSTNAME -O "Acme Branch Company" -d /etc/asterisk/keys
+	[ ! -f /etc/asterisk/keys/ca.crt ] && echo "ERROR: ca.crt not found" && exit 1
+	[ ! -f /etc/asterisk/keys/ca.key ] && echo "ERROR: ca.keys not found" && exit 1
+	./contrib/scripts/ast_tls_cert -m client -c /etc/asterisk/keys/ca.crt -k /etc/asterisk/keys/ca.key -C $HOSTNAME -O "Acme Branch Company" -d /etc/asterisk/keys -o user
+	ls /etc/asterisk/keys
+}
 
 configure_menuselect()
 {
 	echo "Configuring menuselect options"
 	make menuselect.makeopts
-	menuselect/menuselect --enable REF_DEBUG --enable DONT_OPTIMIZE --enable TEST_FRAMEWORK --enable DO_CRASH --enable BETTER_BACKTRACES --enable EXTRA-SOUNDS-EN-GSM menuselect.makeopts
+
+	BUILD_NATIVE=""
+	SYSTEM_PRODUCT_NAME="`sudo dmidecode -s system-product-name`"
+	[ "$SYSTEM_PRODUCT_NAME" = "" ] && BUILD_NATIVE="--disable BUILD_NATIVE"
+	[ "$SYSTEM_PRODUCT_NAME" = "VMware Virtual Platform" ] && BUILD_NATIVE="--disable BUILD_NATIVE"
+	[ ! -z "$BUILD_NATIVE" ] && echo "WARNING: BUILD NATIVE DISABLED ($SYSTEM_PRODUCT_NAME)"
+
+	REF_DEBUG=""
+	# REF_DEBUG="--enable REF_DEBUG"
+	menuselect/menuselect $REF_DEBUG $BUILD_NATIVE --enable DONT_OPTIMIZE --enable TEST_FRAMEWORK --enable DO_CRASH --enable BETTER_BACKTRACES --enable EXTRA-SOUNDS-EN-GSM menuselect.makeopts
 }
 
 
@@ -91,6 +111,13 @@ do
 		# run with valgrind
 		shift
 		sudo valgrind -q --log-file=/tmp/vg.log --num-callers=50 --error-limit=no --leak-check=no --undef-value-errors=no --suppressions=/home/$USER/testsuite-valgrind/configs/valgrind.supp asterisk -c $*
+		exit
+		;;
+	-tls)
+		# install tls
+		set -ex
+		[ `whoami` != 'root' ] && exec sudo env PATH=$PATH $0 -tls
+		install_tls
 		exit
 		;;
 	*)
