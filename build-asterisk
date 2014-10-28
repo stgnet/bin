@@ -104,7 +104,7 @@ do
 		make distclean
 		./configure --enable-dev-mode --libdir=$SYSLIBDIR
 		configure_menuselect
-		make
+		make -j`nproc` 
 		exit
 		;;
 	-vgrun)
@@ -275,7 +275,7 @@ CONFOPTS="--enable-dev-mode"
 #make menuselect || exit $?
 configure_menuselect
 
-make || exit $?
+make -j`nproc` || exit $?
 
 if $ASKINSTALL 
 then
