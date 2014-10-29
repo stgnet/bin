@@ -1,0 +1,5 @@
+#!/bin/bash
+# I've had to do this two too many times
+git config --global user.name "Scott Griepentrog"
+git config --global user.email scott@griepentrog.com
+git commit --amend --reset-author
