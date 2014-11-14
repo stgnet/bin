@@ -1,0 +1,5 @@
+#!/bin/sh
+# install minimal base packages for CLI comfort
+
+[ ! -f /etc/yum.repos.d/epel.repo ] && install-packages epel-release
+install-packages bind-utils
