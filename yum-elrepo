@@ -1,19 +1,16 @@
 #!/bin/sh
 # Install EPEL for this version
+[ `whoami` != 'root' ] && exec sudo $0
 
 [ ! -f /etc/redhat-release ] && echo "ERROR: not a RedHat/Fedora/CentOS system" && exit
 
 RHVER="`cat /etc/redhat-release`"
 
-VERSION=""
-[ "$RHVER" = "CentOS release 6.3 (Final)" ] && VERSION="6"
-[ "$RHVER" = "CentOS release 6.4 (Final)" ] && VERSION="6"
-[ "$RHVER" = "CentOS release 6.5 (Final)" ] && VERSION="6"
-[ "$RHVER" = "CentOS release 5.7 (Final)" ] && VERSION="5"
-
-[ -z "$VERSION" ] && echo "ERROR: version not implemented in script - please fix:" && echo $RHVER && exit
+VERSION="${RHVER#* release }"
+VERSION="${VERSION%.*}"
 
 RPM=""
+[ "$VERSION" = "7.0" ] && RPM="elrepo-release-7.0-2.el7.elrepo.noarch.rpm"
 [ "$VERSION" = "6" ] && RPM="elrepo-release-6-5.el6.elrepo.noarch.rpm"
 [ "$VERSION" = "5" ] && RPM="elrepo-release-5-4.el6.elrepo.noarch.rpm"
 
