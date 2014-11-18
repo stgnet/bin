@@ -41,7 +41,7 @@ else
 	for pkg in $*
 	do
 		deb="${pkg#*/}"
-		dpkg-query -l "$deb" >/dev/null || PKGS="$PKGS $deb"
+		dpkg-query -s "$deb" >/dev/null || PKGS="$PKGS $deb"
 	done
 	if [ $SINGLE ]
 	then
