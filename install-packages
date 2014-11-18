@@ -17,6 +17,7 @@ SINGLE=""
 if [ "$1" = "-1" ]
 then
 	SINGLE=1
+	shift
 fi
 
 if [ -f /etc/redhat-release ]
