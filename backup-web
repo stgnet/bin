@@ -1,0 +1,43 @@
+#!/bin/sh
+# backup web nightly to remote server
+
+option_install()
+{
+	[ -z "$1" ] && echo "No destination specified" && exit 1
+	MIN=`expr $RANDOM % 60`
+	HOUR=1
+	echo "$MIN $HOUR * * * root $0 backup $1" >> /etc/crontab
+	exit
+}
+
+option_uninstall()
+{
+	sed -i "/$0/d" /etc/crontab && exit
+}
+
+backup_list()
+{
+	echo '/var/www'
+	ls -1 /var/lib/mysql/*.backup |sed 's/.backup//'
+}
+
+option_backup()
+{
+	[ -z "$1" ] && echo "No destination specified" && exit 1
+	TGZ="web-backup-`date '+%F'`.tgz"
+	tar cfz /tmp/$TGZ `backup_list`
+	scp /tmp/$TGZ $1
+}
+
+if [ -z "$1" ]
+then
+	echo "use: $0 install (scp target path) - adds nightly cronjob"
+	echo "     $0 uninstall                 - remove cronjob"
+	echo "     $0 backup  (scp target path) - manual run"
+	exit
+fi
+
+OPT="$1"
+shift
+option_$OPT $*
+
