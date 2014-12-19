@@ -1,0 +1,41 @@
+#!/bin/sh
+# nightly run certain tasks
+
+option_install()
+{
+	MIN=`expr $RANDOM % 60`
+	HOUR=0
+	#echo "$MIN $HOUR * * * $USER $0 run" >> /etc/crontab
+	sudo sed -i -e "\$a$MIN $HOUR * * * $USER $0 run" /etc/crontab
+	exit
+}
+
+option_uninstall()
+{
+	SCRIPT=`basename $0`
+	sudo sed -i "/$SCRIPT/d" /etc/crontab
+}
+
+option_run()
+{
+	git pull
+	for SCRIPT in run-*
+	do
+		$SCRIPT
+	done
+}
+
+set -ex
+
+if [ -z "$1" ]
+then
+	echo "use: $0 install - adds nightly cronjob"
+	echo "     $0 uninstall - remove cronjob"
+	echo "     $0 run - manual run"
+	exit
+fi
+
+OPT="$1"
+shift
+option_$OPT $*
+

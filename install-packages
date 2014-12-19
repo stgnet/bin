@@ -53,3 +53,4 @@ else
 		[ ! -z "$PKGS" ] && sudo apt-get -y install $PKGS || install-packages -1 $PKGS
 	fi
 fi
+exit 0
