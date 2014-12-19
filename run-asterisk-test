@@ -16,6 +16,8 @@ mock -r $MOCK --clean
 #&& exit
 
 #[ ! -d /var/lib/mock/$MOCK ] &&
-mock -r $MOCK --init && mock -r $MOCK --install yum git
+mock -r $MOCK --init
+mock -r $MOCK --install yum git sudo
 mock -r $MOCK --chroot "cd ; git clone https://github.com/stgnet/bin"
+mock -r $MOCK --chroot "sed -i -e 's/ requiretty/!requiretty/' /etc/sudoers"
 mock -r $MOCK --chroot "~/bin/mock-asterisk-test"
