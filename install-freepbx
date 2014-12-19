@@ -24,6 +24,9 @@ then
 	exit 1
 fi
 
+
+rm -f /etc/amportal.conf
+
 [ ! -d /usr/src ] && mkdir -p /usr/src
 cd /usr/src
 
@@ -39,7 +42,6 @@ yum -y install gcc gcc-c++ lynx bison mysql-devel mysql-server php php-mysql php
 #yum -y install automake PyYAML lua-devel libpcap-devel gcc-objc python-devel python-twisted git subversion libtiff-devel make wget openssl-devel ncurses-devel newt-devel libxml2-devel kernel-devel gcc gcc-c++ sqlite-devel libuuid-devel gtk2-devel gmime-devel gmime22-devel patch python-setuptools unixODBC-devel libcurl-devel libogg-devel libvorbis-devel speex-devel spandsp-devel freetds-devel net-snmp-devel iksemel-devel openais-devel popt-devel libtool-ltdl-devel libsqlite3x-devel radiusclient-ng-devel portaudio-devel postgresql-devel libresample-devel neon-devel libical-devel openldap-devel sqlite2-devel mysql-devel bluez-libs-devel jack-audio-connection-kit-devel Cython python-pip
 #yum -y install libtool-ltdl-devel unixODBC unixODBC-devel mysql-connector-odbc
 
-chkconfig iptables off
 service iptables stop
 
 pear channel-update pear.php.net
@@ -54,16 +56,6 @@ pear install db-1.7.14 || echo "Ignoring error that pear is already installed."
 
 # install extra sounds
 wget -O - http://downloads.asterisk.org/pub/telephony/sounds/asterisk-extra-sounds-en-gsm-current.tar.gz | tar xvfz - --directory=/var/lib/asterisk/sounds
-
-# remove any existing configuration
-if [ ! -d /etc/asterisk-before-freepbx ]
-then
-	echo "Saving copy of /etc/asterisk configuration to /etc/asterisk-before-freepbx..."
-	mkdir /etc/asterisk-before-freepbx
-	rsync -avr /etc/asterisk/. /etc/asterisk-before-freepbx/.
-fi
-rm -rf /etc/asterisk
-mkdir /etc/asterisk
 
 # get FreePBX
 rm -rf freepbx
@@ -111,7 +103,7 @@ mysql -u root -e "GRANT ALL PRIVILEGES ON asteriskcdrdb.* to asteriskuser@localh
 mysql -u root -e "flush privileges;"
 
 ./start_asterisk start
-./install_amp --installdb --username=asteriskuser --password=$ASTERISK_DB_PW
+./install_amp --installdb --username=asteriskuser --password=$ASTERISK_DB_PW --scripted 
 amportal chown
 amportal a ma installall 
 amportal a reload
@@ -121,3 +113,5 @@ amportal chown
 ln -s /var/lib/asterisk/moh /var/lib/asterisk/mohmp3
 amportal restart
 
+service iptables on
+# do fail2ban here too
