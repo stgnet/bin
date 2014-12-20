@@ -1,0 +1,42 @@
+--- main.cf	2014-06-09 21:39:24.000000000 -0400
++++ /tmp/postfix/main.cf	2014-12-09 21:05:17.000000000 -0500
+@@ -97,6 +97,7 @@
+ #
+ #myorigin = $myhostname
+ #myorigin = $mydomain
++myorigin = stg.net
+ 
+ # RECEIVING MAIL
+ 
+@@ -112,11 +113,12 @@
+ #
+ #inet_interfaces = all
+ #inet_interfaces = $myhostname
+-#inet_interfaces = $myhostname, localhost
+-inet_interfaces = localhost
++inet_interfaces = $myhostname, localhost
++#inet_interfaces = localhost
+ 
+ # Enable IPv4, and IPv6 if supported
+-inet_protocols = all
++#inet_protocols = all
++inet_protocols = ipv4
+ 
+ # The proxy_interfaces parameter specifies the network interface
+ # addresses that this mail system receives mail on by way of a
+@@ -264,6 +266,7 @@
+ #mynetworks = 168.100.189.0/28, 127.0.0.0/8
+ #mynetworks = $config_directory/mynetworks
+ #mynetworks = hash:/etc/postfix/network_table
++mynetworks = 216.207.245.1, 127.0.0.0/8
+ 
+ # The relay_domains parameter restricts what destinations this system will
+ # relay mail to.  See the smtpd_recipient_restrictions description in
+@@ -294,6 +297,7 @@
+ # permit_mx_backup restriction description in postconf(5).
+ #
+ #relay_domains = $mydestination
++relay_domains = stg.net, griepentrog.com, digium.com
+ 
+ # INTERNET OR INTRANET
+ 
