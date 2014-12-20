@@ -1,0 +1,23 @@
+#!/bin/sh
+# use a mock shell to run asterisk testsuite
+set -ex
+
+MOCK="epel-7-x86_64"
+
+[ `uname -m` != "x86_64" ] && echo "Error: CentOS 7 requires x86_64" && exit 1
+install-packages mock
+
+[ ! -f /etc/mock/$MOCK.cfg ] && echo "Error: did not find $MOCK.cfg in /etc/mock, maybe udpate mock?" && exit 1
+
+grep "^mock:.*$USER" /etc/group || sudo usermod -a -G mock $USER
+
+#[ "$1" = "-e" ] &&
+mock -r $MOCK --clean
+#&& exit
+
+#[ ! -d /var/lib/mock/$MOCK ] &&
+mock -r $MOCK --init
+mock -r $MOCK --install yum git sudo
+mock -r $MOCK --chroot "cd ; git clone https://github.com/stgnet/bin"
+mock -r $MOCK --chroot "sed -i -e 's/ requiretty/!requiretty/' /etc/sudoers"
+mock -r $MOCK --chroot "~/bin/mock-asterisk-test"

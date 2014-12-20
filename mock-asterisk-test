@@ -1,0 +1,10 @@
+#!/bin/sh
+# run asterisk testsuite
+set -ex
+# don't presume that PATH includes ~/bin (mock-erdization)
+export PATH="~/bin:$PATH"
+
+ba -i trunk
+ba testsuite
+cd testsuite
+./runtests
