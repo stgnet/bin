@@ -300,7 +300,7 @@ then
 		# presume that root installation is necessary using sudo
 		while ! sudo make uninstall ; do echo -en '\007'; done
 		while ! sudo make install ; do echo -en '\007'; done
-		#[ ! -f /etc/asterisk/extensions.conf ] && sudo make samples
+		sudo /bin/bash -c '[ ! -f /etc/asterisk/asterisk.conf ] && make samples'
 		if [ `uname -m` = "x86_64" ] 
 		then
 			# older asterisk.conf may have wrong path

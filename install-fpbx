@@ -56,15 +56,17 @@ chkconfig iptables off
 #?make menuselect.makeopts
 #menuselect/menuselect --enable cdr_mysql --enable EXTRA-SOUNDS-EN-GSM menuselect.makeopts
 
-adduser asterisk -M -d /var/lib/asterisk -s /sbin/nologin -c "Asterisk User"
+grep '^asterisk:' /etc/passwd > /dev/null || adduser asterisk -M -d /var/lib/asterisk -s /sbin/nologin -c "Asterisk User"
 make && make install && chown -R asterisk. /var/lib/asterisk
 
-pear install db-1.7.14
+pear install db-1.7.14 || echo "Ignoring error from already installed package"
 VERSION=12.0
 USERNAME=asteriskuser
 PASSWORD=amp109
 
 service mysqld start
+mysqladmin -f drop asterisk
+mysqladmin -f drop asteriskcdrdb
 mysqladmin create asterisk
 mysqladmin create asteriskcdrdb
 mysql -e "GRANT ALL PRIVILEGES ON asterisk.* TO $USERNAME@localhost IDENTIFIED BY '$PASSWORD';"
@@ -72,11 +74,12 @@ mysql -e "GRANT ALL PRIVILEGES ON asteriskcdrdb.* TO $USERNAME@localhost IDENTIF
 mysql -e "flush privileges;"
 
 cd /usr/src
+rm -rf freepbx
 git clone -b release/$VERSION https://github.com/FreePBX/framework.git freepbx
 
 cd /usr/src/freepbx
 ./start_asterisk start
-mv /var/www/html /var/www/html_orig
+[ -d /var/www/html ] && mv /var/www/html /var/www/html_orig
 ./install_amp --installdb --skip-module-install --username $USERNAME --password $PASSWORD
 #?# Press ENTER for all the questions including the incorrect IP address.
 #Do not be concerned by all the warning messages.
