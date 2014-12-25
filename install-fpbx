@@ -78,9 +78,10 @@ rm -rf freepbx
 git clone -b release/$VERSION https://github.com/FreePBX/framework.git freepbx
 
 cd /usr/src/freepbx
-./start_asterisk start
+sh -x ./start_asterisk start
+read PAUSE
 [ -d /var/www/html ] && mv /var/www/html /var/www/html_orig
-./install_amp --installdb --skip-module-install --username $USERNAME --password $PASSWORD
+./install_amp --scripted --installdb --username $USERNAME --password $PASSWORD
 #?# Press ENTER for all the questions including the incorrect IP address.
 #Do not be concerned by all the warning messages.
 
