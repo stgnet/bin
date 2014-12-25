@@ -65,8 +65,8 @@ USERNAME=asteriskuser
 PASSWORD=amp109
 
 service mysqld start
-mysqladmin -f drop asterisk
-mysqladmin -f drop asteriskcdrdb
+mysqladmin -f drop asterisk || echo "Ignoring that"
+mysqladmin -f drop asteriskcdrdb || echo "Ignoring that"
 mysqladmin create asterisk
 mysqladmin create asteriskcdrdb
 mysql -e "GRANT ALL PRIVILEGES ON asterisk.* TO $USERNAME@localhost IDENTIFIED BY '$PASSWORD';"
