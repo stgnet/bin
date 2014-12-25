@@ -57,7 +57,7 @@ chkconfig iptables off
 #menuselect/menuselect --enable cdr_mysql --enable EXTRA-SOUNDS-EN-GSM menuselect.makeopts
 
 grep '^asterisk:' /etc/passwd > /dev/null || adduser asterisk -M -d /var/lib/asterisk -s /sbin/nologin -c "Asterisk User"
-make && make install && chown -R asterisk. /var/lib/asterisk
+make && make install
 
 pear install db-1.7.14 || echo "Ignoring error from already installed package"
 VERSION=12.0
@@ -77,8 +77,14 @@ cd /usr/src
 rm -rf freepbx
 git clone -b release/$VERSION https://github.com/FreePBX/framework.git freepbx
 
+chown -R asterisk. /var/run/asterisk
+chown -R asterisk. /etc/asterisk
+chown -R asterisk. /var/lib/asterisk
+chown -R asterisk. /var/{lib,log,spool}/asterisk
+chown -R asterisk. /var/www
+
 cd /usr/src/freepbx
-sh -x ./start_asterisk start
+./start_asterisk start
 read PAUSE
 [ -d /var/www/html ] && mv /var/www/html /var/www/html_orig
 ./install_amp --scripted --installdb --username $USERNAME --password $PASSWORD
