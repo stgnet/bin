@@ -1,0 +1,155 @@
+#!/bin/sh
+# Install FreePBX - version 2
+
+set -ex
+
+# this all has to be run as root
+[ `whoami` != 'root' ] && exec sudo $0
+
+cd /usr/src
+
+# install asterisk if not already
+which asterisk || build-asterisk -i 11
+
+# disable selinux
+if [ -z "`sestatus |grep 'status: *disabled'`" ]
+then
+        echo "Disabling selinux..."
+        sed -i 's/SELINUX=.*/SELINUX=disabled/' /etc/sysconfig/selinux
+        echo 0 >/selinux/enforce
+fi
+
+# erase any previous configuration
+rm -f /etc/amportal.conf
+
+yum -y update
+yum -y groupinstall core
+yum -y groupinstall base
+
+yum -y install automake gcc gcc-c++ ncurses-devel openssl-devel libxml2-devel unixODBC-devel libcurl-devel libogg-devel libvorbis-devel speex-devel spandsp-devel freetds-devel net-snmp-devel iksemel-devel corosynclib-devel newt-devel popt-devel libtool-ltdl-devel lua-devel sqlite-devel radiusclient-ng-devel portaudio-devel libresample-devel neon-devel libical-devel openldap-devel gmime-devel mysql-devel bluez-libs-devel jack-audio-connection-kit-devel gsm-devel libedit-devel libuuid-devel jansson-devel libsrtp-devel subversion git subversion libxslt-devel kernel-devel audiofile-devel gtk2-devel libtiff-devel libtermcap-devel bison php php-mysql php-process php-pear php-mbstring php-xml php-gd tftp-server httpd sox tzdata mysql-connector-odbc mysql-server fail2ban
+
+# disable firewall
+service iptables save
+service iptables stop
+chkconfig iptables off
+
+#wget http://www.pjsip.org/release/2.3/pjproject-2.3.tar.bz2
+#tar -xjvf pjproject*
+#ARCH=$(getconf LONG_BIT | grep "64")
+#./configure --prefix=/usr --libdir=/usr/lib${ARCH} --enable-shared --disable-sound --disable-resample --disable-video --disable-opencore-amr CFLAGS='-O2 -DNDEBUG'
+#make uninstall && make dep && make && make install && ldconfig
+
+#cd /usr/src
+#wget http://downloads.asterisk.org/pub/telephony/asterisk/asterisk-13-current.tar.gz
+#tar zxvf asterisk-13-current.tar.gz
+#cd /usr/src/asterisk-13*/
+#make distclean
+#ARCH=$(getconf LONG_BIT | grep "64")
+#./configure --libdir=/usr/lib${ARCH}
+
+
+#To select compile options manually from gui menu run "make menuselect" instead of the following commands.
+#To list command line options type menuselect/menuselect --list-options
+#If Asterisk fails to run on a virtual machine try add "--disable BUILD_NATIVE"
+#To add asterisk realtime for applications such as A2billing add "--enable res_config_mysql"
+
+#?make menuselect.makeopts
+#menuselect/menuselect --enable cdr_mysql --enable EXTRA-SOUNDS-EN-GSM menuselect.makeopts
+
+adduser asterisk -M -d /var/lib/asterisk -s /sbin/nologin -c "Asterisk User"
+make && make install && chown -R asterisk. /var/lib/asterisk
+
+pear install db-1.7.14
+VERSION=12.0
+USERNAME=asteriskuser
+PASSWORD=amp109
+
+service mysqld start
+mysqladmin create asterisk
+mysqladmin create asteriskcdrdb
+mysql -e "GRANT ALL PRIVILEGES ON asterisk.* TO $USERNAME@localhost IDENTIFIED BY '$PASSWORD';"
+mysql -e "GRANT ALL PRIVILEGES ON asteriskcdrdb.* TO $USERNAME@localhost IDENTIFIED BY '$PASSWORD';"
+mysql -e "flush privileges;"
+
+cd /usr/src
+git clone -b release/$VERSION https://github.com/FreePBX/framework.git freepbx
+
+cd /usr/src/freepbx
+./start_asterisk start
+mv /var/www/html /var/www/html_orig
+./install_amp --installdb --skip-module-install --username $USERNAME --password $PASSWORD
+#?# Press ENTER for all the questions including the incorrect IP address.
+#Do not be concerned by all the warning messages.
+
+# Minimal module install
+amportal a ma upgrade framework
+amportal a ma upgrade core
+amportal a ma upgrade voicemail
+amportal a ma upgrade sipsettings
+amportal a ma upgrade infoservices
+amportal a ma upgrade featurecodeadmin
+amportal a ma upgrade logfiles
+amportal a ma upgrade callrecording
+amportal a ma upgrade cdr
+amportal a ma upgrade dashboard
+
+# Optionally install all standard modules
+amportal a ma upgrade manager
+amportal a ma installall
+amportal restart
+amportal a reload
+amportal chown
+#If the GUI complains about problems with the framework module or a missing /usr/sbin/amportal file try amportal a ma delete framework followed by amportal a ma upgrade framework.
+
+#Setting a mysql root password is recommended.  
+
+#MYSQL_ROOT_PW=abcdef
+#mysqladmin -u root password "$MYSQL_ROOT_PW"
+
+sed -i "s/User apache/User asterisk/" /etc/httpd/conf/httpd.conf
+sed -i "s/Group apache/Group asterisk/" /etc/httpd/conf/httpd.conf
+Enable .htaccess files to protect sensitive webserver directories.
+
+sed -i ':a;N;$!ba;s/AllowOverride None/AllowOverride All/2' /etc/httpd/conf/httpd.conf
+
+#Prevent external MySQL access.
+sed -i "2i bind-address=127.0.0.1" /etc/my.cnf
+chkconfig mysqld on
+chkconfig httpd on
+
+#Change “upload_max_filesize” from default 2M to 20M to allow larger music on hold files.
+sed -i 's/upload_max_filesize = .*/upload_max_filesize = 20M/' /etc/php.ini
+
+echo /usr/local/sbin/amportal start >> /etc/rc.local
+
+
+#yum -y install tftp-server
+#nano /etc/xinetd.d/tftp
+#change
+# server_args = -s /var/lib/tftpboot
+#to
+#server_args = -s /tftpboot
+#
+#change
+#disable=yes
+#to
+#disable=no
+#
+#mkdir /tftpboot
+#chmod 777 /tftpboot
+#service xinetd restart
+
+cd /usr/src
+wget http://sourceforge.net/projects/mpg123/files/mpg123/1.21.0/mpg123-1.21.0.tar.bz2
+tar -xjvf mpg123*
+
+cd mpg123*/
+ARCH=$(getconf LONG_BIT | grep "64")
+./configure --prefix=/usr --libdir=/usr/lib${ARCH} && make && make install && ldconfig
+Digum addons
+
+
+#cd /usr/src
+#wget http://downloads.digium.com/pub/register/linux/register
+#chmod +x register
+#./register
