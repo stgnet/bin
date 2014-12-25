@@ -90,8 +90,8 @@ chkconfig httpd on
 chkconfig mysqld on
 
 export ASTERISK_DB_PW=amp109
-mysql -u root -e "DROP DATABASE asterisk;"
-mysql -u root -e "DROP DATABASE asteriskcdrdb;"
+mysql -u root -e "DROP DATABASE asterisk;" || echo "Database did not exist"
+mysql -u root -e "DROP DATABASE asteriskcdrdb;" || echo "Database did not exist"
 
 mysqladmin -u root create asterisk
 mysqladmin -u root create asteriskcdrdb
