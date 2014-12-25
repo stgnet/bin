@@ -17,13 +17,13 @@ then
 	echo "Disabling selinux..."
 	sed -i 's/SELINUX=.*/SELINUX=disabled/' /etc/sysconfig/selinux
 	echo 0 >/selinux/enforce
-fi
-if [ -z "`sestatus |grep 'status: *disabled'`" ]
-then
-	echo "Please reboot, then retry install"
-	exit 1
-fi
 
+	if [ "`cat /selinux/enforce`" != "0" ]
+	then
+		echo "Please reboot, then retry install"
+		exit 1
+	fi
+fi
 
 rm -f /etc/amportal.conf
 
