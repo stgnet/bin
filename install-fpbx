@@ -90,7 +90,7 @@ mysql -e "flush privileges;"
 
 ./start_asterisk start
 [ -d /var/www/html ] && mv /var/www/html /var/www/html_orig
-./install_amp --scripted --installdb --username $USERNAME --password $PASSWORD
+./install_amp --scripted --installdb --dbhost localhost --username $USERNAME --password $PASSWORD
 #?# Press ENTER for all the questions including the incorrect IP address.
 #Do not be concerned by all the warning messages.
 
