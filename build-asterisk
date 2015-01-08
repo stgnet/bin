@@ -41,6 +41,17 @@ configure_menuselect()
 	menuselect/menuselect $REF_DEBUG $BUILD_NATIVE --enable DONT_OPTIMIZE --enable TEST_FRAMEWORK --enable DO_CRASH --enable BETTER_BACKTRACES --enable EXTRA-SOUNDS-EN-GSM menuselect.makeopts
 }
 
+install_testsuite_dependencies()
+{
+	# make sure dependencies are installed
+	install-packages python-pip python-setuptools python-yaml python-twisted-core
+
+	if [ -z "`pip list |fgrep starpy`" ] 
+	then
+		(cd addons && make update && cd starpy && sudo python setup.py install)
+	fi
+}
+
 
 SYSLIBDIR="/usr/lib"
 [ `uname -m` = "x86_64" ] && [ -d /usr/lib64 ] && SYSLIBDIR="/usr/lib64"
@@ -178,12 +189,15 @@ done
 	if [ "$VERSION" = "testsuite" ]
 	then
 		[ -d testsuite ] && echo "ERROR: testsuite directory already exists" && exit 1
+
 		if [ -f ~/.subversion/Digium_SVN-cacert-sha1.pem ]
 		then
 			svn co https://origsvn.digium.com/svn/testsuite/asterisk/trunk testsuite
 		else
 			svn co http://svn.asterisk.org/svn/testsuite/asterisk/trunk testsuite
 		fi
+		cd testsuite
+		install_testsuite_dependencies
 		# stop here
 		exit 0
 	fi
