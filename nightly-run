@@ -1,6 +1,8 @@
 #!/bin/sh
 # nightly run certain tasks
 
+export PATH="/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin:~/bin"
+
 option_install()
 {
 	MIN=`expr $RANDOM % 60`
@@ -22,7 +24,7 @@ option_run()
 	git pull
 	for SCRIPT in run-*
 	do
-		$SCRIPT
+		./$SCRIPT
 	done
 }
 

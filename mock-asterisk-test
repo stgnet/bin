@@ -7,4 +7,5 @@ export PATH="~/bin:$PATH"
 ba -i trunk
 ba testsuite
 cd testsuite
-./runtests
+pwd ; ls ; echo $PATH
+./runtests.py

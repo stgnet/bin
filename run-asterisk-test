@@ -11,11 +11,7 @@ install-packages mock
 
 grep "^mock:.*$USER" /etc/group || sudo usermod -a -G mock $USER
 
-#[ "$1" = "-e" ] &&
-mock -r $MOCK --clean
-#&& exit
-
-#[ ! -d /var/lib/mock/$MOCK ] &&
+mock -v -r $MOCK --clean
 mock -r $MOCK --init
 mock -r $MOCK --install yum git sudo
 mock -r $MOCK --chroot "cd ; git clone https://github.com/stgnet/bin"
