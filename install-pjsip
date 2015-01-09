@@ -33,11 +33,11 @@ echo "#define PJ_HAS_IPV6 1" >pjlib/include/pj/config_site.h
 ./configure --enable-shared --libdir=$LIBDIR --with-external-srtp --with-external-speex --with-external-pa --disable-resample 
 make dep 
 make 
-make -C pjsip-apps/build pjsua
+#make -C pjsip-apps/build pjsua
 sudo make install 
 sudo ldconfig
 
-sudo cp -v pjsip-apps/bin/pjsua-`uname -m`-*-linux-gnu /usr/sbin/pjsua
-sudo make -C pjsip-apps/src/python install
+#sudo cp -v pjsip-apps/bin/pjsua-`uname -m`-*-linux-gnu /usr/sbin/pjsua
+#sudo make -C pjsip-apps/src/python install
 
 sudo chown -R $USER.$USER .

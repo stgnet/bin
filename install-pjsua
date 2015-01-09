@@ -1,44 +1,46 @@
 #!/bin/sh
 # asterisk testsuite - install needed dependancies
 
-SYSLIBDIR=/usr/lib
+LIBDIR=/usr/lib$(getconf LONG_BIT |fgrep 64)
+[ ! -d $LIBDIR ] && LIBDIR=/usr/lib
 
 set -ex
 
 # install PJSUA
+rm -rf pjsua
+svn co http://svn.pjsip.org/repos/pjproject/trunk pjsua
+cd pjsua
 
-#svn co http://svn.pjsip.org/repos/pjproject/trunk pjsua >svn-co-pjsua.out 2>&1
-tar xvf pjproject-2.1-digium1*
-cd pjproject-2.1-digium1-22-g217740d
+cat pjlib/include/pj/config_site_sample.h > pjlib/include/pj/config_site.h
+echo "#define PJ_HAS_IPV6 1" >> pjlib/include/pj/config_site.h
 
-echo "#define PJ_HAS_IPV6 1" >pjlib/include/pj/config_site.h
 # sandwichmaker-puppet doesn't do this...
 #cat pjlib/include/pj/config_site_sample.h  >>pjlib/include/pj/config_site.h
 
-#./configure CFLAGS=-fPIC
-./configure --enable-shared --libdir=$SYSLIBDIR --with-external-srtp --with-external-speex --with-external-pa 
+./configure CFLAGS=-fPIC
+#./configure --enable-shared --libdir=$LIBDIR --with-external-srtp --with-external-speex --with-external-pa
 
-make dep 
-make 
-make -C pjsip-apps/build pjsua  
-sudo make install 
+make dep
+make
+#make -C pjsip-apps/build pjsua
+#sudo make install
 
 sudo cp -v pjsip-apps/bin/pjsua-`uname -m`-*-linux-gnu /usr/sbin/pjsua
-sudo make -C pjsip-apps/src/python install 
+sudo make -C pjsip-apps/src/python install
 
 # some files left as root
 sudo chown -R $USER.$USER .
 
 # reinstall libraries with different configuration options (per puppet)
-./configure --enable-shared --libdir=$SYSLIBDIR --with-external-srtp --with-external-speex --with-external-pa --disable-resample 
-
-make dep 
-make 
-sudo make install 
-sudo ldconfig
+#./configure --enable-shared --libdir=$SYSLIBDIR --with-external-srtp --with-external-speex --with-external-pa --disable-resample 
+#
+#make dep 
+#make 
+#sudo make install 
+#sudo ldconfig
 
 
 # some files left as root
-sudo chown -R $USER.$USER .
-cd ..
+#sudo chown -R $USER.$USER .
+#cd ..
 
