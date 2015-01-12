@@ -90,7 +90,7 @@ mysql -e "flush privileges;"
 
 ./start_asterisk start
 [ -d /var/www/html ] && mv /var/www/html /var/www/html_orig
-./install_amp --scripted --installdb --dbhost localhost --username $USERNAME --password $PASSWORD
+./install_amp --scripted --installdb --dbhost localhost --username $USERNAME --password $PASSWORD --force-overwrite --cleaninstall
 #?# Press ENTER for all the questions including the incorrect IP address.
 #Do not be concerned by all the warning messages.
 
@@ -130,7 +130,7 @@ sed -i "2i bind-address=127.0.0.1" /etc/my.cnf
 chkconfig mysqld on
 chkconfig httpd on
 
-#Change “upload_max_filesize” from default 2M to 20M to allow larger music on hold files.
+#Change â€œupload_max_filesizeâ€ from default 2M to 20M to allow larger music on hold files.
 sed -i 's/upload_max_filesize = .*/upload_max_filesize = 20M/' /etc/php.ini
 
 echo /usr/local/sbin/amportal start >> /etc/rc.local
