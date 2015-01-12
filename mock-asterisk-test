@@ -9,3 +9,4 @@ ba testsuite
 cd testsuite
 pwd ; ls ; echo $PATH
 ./runtests.py
+Mail -s "TESTSUITE RESULTS" sgriepentrog@digium.com < asterisk-test-suite-report.xml

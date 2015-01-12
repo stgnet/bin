@@ -44,12 +44,14 @@ configure_menuselect()
 install_testsuite_dependencies()
 {
 	# make sure dependencies are installed
-	install-packages python-pip python-setuptools python-yaml python-twisted-core
+	install-packages python-pip python-setuptools PyYAML python-twisted-core
+	which pjsua > /dev/null || install-pjsua
 
 	if [ -z "`pip list |fgrep starpy`" ] 
 	then
 		(cd addons && make update && cd starpy && sudo python setup.py install)
 	fi
+
 }
 
 
