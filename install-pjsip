@@ -16,7 +16,7 @@ then
 	git clone https://github.com/asterisk/pjproject pjproject
 	cd pjproject
 	echo "#define PJ_HAS_IPV6 1" >pjlib/include/pj/config_site.h
-	./configure --enable-shared --libdir=$LIBDIR --with-external-srtp --with-external-speex --with-external-pa --disable-resample 
+	./configure --enable-shared --prefix=/usr --libdir=$LIBDIR --with-external-srtp --with-external-speex --with-external-pa --disable-resample 
 	make dep 
 	make 
 	sudo make install 
