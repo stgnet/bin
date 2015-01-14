@@ -13,10 +13,17 @@
 
 PKGS=""
 SINGLE=""
+UPDATE=""
 
 if [ "$1" = "-1" ]
 then
 	SINGLE=1
+	shift
+fi
+
+if [ "$1" = "-u" ]
+then
+	UPDATE=1
 	shift
 fi
 
@@ -26,9 +33,10 @@ then
 	do
 		rh="${pkg%/*}"
 		[ -z "$rh" ] && continue
+		[ "$UPDATE" ] && PKGS="$PKGS $rh" && continue
 		rpm -q $rh >/dev/null || PKGS="$PKGS $rh"
 	done
-	if [ $SINGLE ]
+	if [ "$SINGLE" ]
 	then
 		for PKG in $PKGS
 		do
@@ -41,9 +49,10 @@ else
 	for pkg in $*
 	do
 		deb="${pkg#*/}"
+		[ "$UPDATE" ] && PKGS="$PKGS $deb" && continue
 		dpkg-query -s "$deb" >/dev/null || PKGS="$PKGS $deb"
 	done
-	if [ $SINGLE ]
+	if [ "$SINGLE" ]
 	then
 		for PKG in $PKGS
 		do

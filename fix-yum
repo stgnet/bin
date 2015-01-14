@@ -1,0 +1,7 @@
+#!/bin/sh
+# fix yum when pycurl complains about ssl backend mismatch
+[ `whoami` != 'root' ] && exec sudo $0
+set -ex
+pip uninstall pycurl
+export PYCURL_SSL_LIBRARY=nss
+pip install pycurl
