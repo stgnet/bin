@@ -17,3 +17,4 @@ mock -r $MOCK --install yum git sudo
 mock -r $MOCK --chroot "cd ; git clone https://github.com/stgnet/bin"
 mock -r $MOCK --chroot "sed -i -e 's/ requiretty/!requiretty/' /etc/sudoers"
 mock -r $MOCK --chroot "~/bin/mock-asterisk-test"
+Mail -s "Asterisk Test Results" sgriepentrog@digium.com < /var/lib/mock/$MOCK/root/testsuite/asterisk-test-suite-report.xml
