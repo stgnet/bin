@@ -3,6 +3,8 @@
 set -ex
 cd /tmp
 
+install-packages libpcap-devel
+
 # this is v3.1: http://sipp.sourceforge.net/snapshots/sipp.2009-07-29.tar.gz
 wget -O sipp.tgz http://downloads.sourceforge.net/project/sipp/sipp/3.3/sipp-3.3.tar.gz
 
