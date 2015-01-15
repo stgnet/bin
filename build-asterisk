@@ -49,6 +49,7 @@ install_testsuite_dependencies()
 	[ ! -d /usr/lib/python2.?/site-packages/construct ] && sudo pip install construct
 	[ ! -d /usr/lib/python2.?/site-packages/requests ] && sudo pip install requests
 	[ ! -d /usr/lib/python2.?/site-packages/autobahn ] && sudo pip install autobahn
+	which sipp > /dev/null || install-sipp
 	which pjsua > /dev/null || install-pjsua
 
 	if [ -z "`pip list |fgrep starpy`" ] 
