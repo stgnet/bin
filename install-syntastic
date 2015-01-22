@@ -2,13 +2,25 @@
 # Install or update vim plugin syntastic
 set -ex
 
-test -f /etc/redhat-release && PKGR=yum || PKGR=apt-get
+# pip package is in epel on rhel based systems
+[ -f /etc/redhat-release -a ! -f /etc/yum.repos.d/epel.repo ] && yum-epel
 
-# first insure vim is installed
-which vim || sudo $PKGR -y install vim
+install-packages vim wget python-pip
 
-# and wget
-which wget || sudo $PKGR -y install wget
+# add some extra whitespace highlighting rules that I like
+if ! fgrep 'highlight Tabs' ~/.vimrc > /dev/null
+then
+	cat <<---- >>~/.vimrc
+highlight Tabs ctermbg=lightgray
+let matchTabs = matchadd("Tabs","\t",-1)
+highlight Tabspace ctermbg=Magenta
+let matchTabspace = matchadd("Tabspace",'\t\zs \+',-1)
+highlight Spacetab ctermbg=Red
+let matchSpacetab = matchadd("Spacetab",' \+\ze\t',-1)
+highlight Trailing ctermbg=red
+let matchTrailing = matchadd("Trailing",'\s\+\$',-1)
+---
+fi
 
 # install the plugin
 
@@ -26,11 +38,6 @@ then
 else
 	git clone https://github.com/scrooloose/syntastic.git
 fi
-
-# pip package is in epel on rhel based systems
-[ -f /etc/redhat-release -a ! -f /etc/yum.repos.d/epel ] && yum-epel
-
-which pip >/dev/null || sudo $PKGR -y install python-pip
 
 # make sure various lints are installed
 sudo pip install flake8
