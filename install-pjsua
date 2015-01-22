@@ -4,6 +4,8 @@
 LIBDIR=/usr/lib$(getconf LONG_BIT |fgrep 64)
 [ ! -d $LIBDIR ] && LIBDIR=/usr/lib
 
+install-packages python-devel
+
 set -ex
 
 # install PJSUA

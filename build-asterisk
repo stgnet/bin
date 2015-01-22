@@ -45,8 +45,15 @@ configure_menuselect()
 install_testsuite_dependencies()
 {
 	# make sure dependencies are installed
-	install-packages python-pip python-setuptools PyYAML python-twisted-core
+	# this is run from testsuite root, giving access to contents
+	install-packages python-pip python-setuptools PyYAML python-twisted-core lua-devel
+	[ ! -d /usr/lib/python2.?/site-packages/construct ] && sudo pip install construct
+	[ ! -d /usr/lib/python2.?/site-packages/requests ] && sudo pip install requests
+	[ ! -d /usr/lib/python2.?/site-packages/autobahn ] && sudo pip install autobahn
+	which sipp > /dev/null || install-sipp
 	which pjsua > /dev/null || install-pjsua
+
+	which asttest || (cd asttest ; make ; sudo make install ; cp /usr/local/bin/asttest /usr/bin)
 
 	if [ -z "`pip list |fgrep starpy`" ] 
 	then
