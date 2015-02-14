@@ -103,6 +103,17 @@ do
 	DIRECTORY=""
 	if [ -f "$WEBROOT/$DOMAIN.pass" ]
 	then
+		for $ERRORFILE in $DOCROOT/error[45][0-9][0-9].*
+		do
+			if [ -f "$ERRORFILE" ]
+			then
+				ERRORDOC="${ERRORFILE##*/}"
+				ERRORCODE="${ERRORDOC#error}"
+				ERRORCODE="${ERRORCODE%.*}"
+				DIRECTORY="$DIRECTORY	ErrorDocument $ERRORCODE $ERRORDOC
+"
+			fi
+		done
 		if [ -f "$WEBROOT/$DOMAIN.allow" ]
 		then
 			cat $WEBROOT/$DOMAIN.allow | while read ALLOW
