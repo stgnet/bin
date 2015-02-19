@@ -30,7 +30,7 @@ svn co http://svn.pjsip.org/repos/pjproject/trunk pjsip-r$REVNUM
 cd pjsip-r$REVNUM
 echo "#define PJ_HAS_IPV6 1" >pjlib/include/pj/config_site.h
 
-./configure --enable-shared --libdir=$LIBDIR --with-external-srtp --with-external-speex --with-external-pa --disable-resample 
+./configure --enable-shared --prefix=/usr --libdir=$LIBDIR --with-external-srtp --with-external-speex --with-external-pa --disable-resample 
 make dep 
 make 
 #make -C pjsip-apps/build pjsua
