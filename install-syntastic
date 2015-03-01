@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Install or update vim plugin syntastic
 set -ex
 

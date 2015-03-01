@@ -1,9 +1,10 @@
 #!/bin/bash
 # run asterisk under valgrind
+set -ex
 cp /dev/null /var/log/asterisk/full
 
-OPTS="--log-file=/tmp/vg.log --suppressions=valgrind.supp --leak-check=full"
-#OPTS="$OPTS --gen-suppressions=all"
+OPTS="--log-file=/tmp/vg.log --num-callers=50 --error-limit=no --suppressions=$HOME/bin/asterisk.supp --leak-check=full"
+OPTS="$OPTS --gen-suppressions=all"
 
 # (sleep 2 ; xterm -e 'gdb asterisk -ex "target remote |/usr/bin/vgdb" -ex "handle SIG32 nostop noprint" -ex "handle SIGHUP nostop ignore" -ex "continue" ' )&
 # OPTS="$OPTS -vgdb=yes -vgdb-error=0"

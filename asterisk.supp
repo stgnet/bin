@@ -1,0 +1,80 @@
+# VALGRIND SUPPRESSIONS FOR ASTERISK
+
+#
+# _dl_close errors
+#
+
+{
+   dlclose-1
+   Memcheck:Addr1
+   fun:...
+   fun:dlclose
+   fun:load_dynamic_module
+   fun:...
+}
+{
+   dlclose-2
+   Memcheck:Addr2
+   fun:...
+   fun:dlclose
+   fun:load_dynamic_module
+   fun:...
+}
+{
+   dlclose-4
+   Memcheck:Addr4
+   fun:...
+   fun:dlclose
+   fun:load_dynamic_module
+   fun:...
+}
+
+
+#
+# codec_speex
+#
+{
+   speex
+   Memcheck:Cond
+   fun:speex_decode_int
+   fun:speextolin_framein
+   fun:framein
+   fun:generate_computational_cost
+   fun:__ast_register_translator
+   fun:load_module
+   fun:start_resource
+   fun:load_resource_list
+   fun:load_modules
+   fun:main
+}
+
+{
+   strcasecmp-context-destroy
+   Memcheck:Addr1
+   fun:strcasecmp
+   fun:__ast_context_destroy
+   fun:ast_context_destroy
+   fun:unload_module
+   fun:ast_module_shutdown
+   fun:really_quit
+   fun:quit_handler
+   fun:handle_stop_gracefully
+   fun:ast_cli_command_full
+   fun:consolehandler
+   fun:main
+}
+
+{
+   RSA-encrypt
+   Memcheck:Cond
+   fun:...
+   fun:RSA_eay_public_encrypt
+   fun:set_common_password
+   fun:handle_handshake_request.isra.4
+   fun:phone_msg_incoming_recv
+   fun:phone_main
+   fun:dummy_start
+   fun:start_thread
+   fun:clone
+}
+
