@@ -51,7 +51,7 @@ ExtendedStatus on
 	DocumentRoot $DEFAULT
 #	ServerName *
 	<Location /server-status>
-	 SetHandler server-status
+	SetHandler server-status
 		Order deny,allow
 		Allow from all
 	</Location>
@@ -101,19 +101,19 @@ do
 "
 
 	DIRECTORY=""
+	for ERRORFILE in $DOCROOT/error[45][0-9][0-9].*
+	do
+		if [ -f "$ERRORFILE" ]
+		then
+			ERRORDOC="${ERRORFILE##*/}"
+			ERRORCODE="${ERRORDOC#error}"
+			ERRORCODE="${ERRORCODE%.*}"
+			DIRECTORY="$DIRECTORY	ErrorDocument $ERRORCODE /$ERRORDOC
+"
+		fi
+	done
 	if [ -f "$WEBROOT/$DOMAIN.pass" ]
 	then
-		for $ERRORFILE in $DOCROOT/error[45][0-9][0-9].*
-		do
-			if [ -f "$ERRORFILE" ]
-			then
-				ERRORDOC="${ERRORFILE##*/}"
-				ERRORCODE="${ERRORDOC#error}"
-				ERRORCODE="${ERRORCODE%.*}"
-				DIRECTORY="$DIRECTORY	ErrorDocument $ERRORCODE $ERRORDOC
-"
-			fi
-		done
 		if [ -f "$WEBROOT/$DOMAIN.allow" ]
 		then
 			cat $WEBROOT/$DOMAIN.allow | while read ALLOW
@@ -130,7 +130,7 @@ do
 	Satisfy any
 "
 	fi
-		
+
 
 	[ -f $WEBROOT/$DOMAIN.options ] && DIRECTORY="$DIRECTORY	Options `cat $WEBROOT/$DOMAIN.options`
 "
@@ -160,7 +160,7 @@ $DIRECTORY
 </VirtualHost>
 
 ---
-	
+
 done
 
 # special restart sequence to insure restart finishes if run FROM httpd
