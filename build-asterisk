@@ -32,7 +32,7 @@ configure_menuselect()
 	make menuselect.makeopts
 
 	BUILD_NATIVE=""
-	SYSTEM_PRODUCT_NAME="`sudo dmidecode -s system-product-name`"
+	SYSTEM_PRODUCT_NAME="`cat /sys/devices/virtual/dmi/id/product_name`"
 	[ "$SYSTEM_PRODUCT_NAME" = "" ] && BUILD_NATIVE="--disable BUILD_NATIVE"
 	[ "$SYSTEM_PRODUCT_NAME" = "VMware Virtual Platform" ] && BUILD_NATIVE="--disable BUILD_NATIVE"
 	[ ! -z "$BUILD_NATIVE" ] && echo "WARNING: BUILD NATIVE DISABLED ($SYSTEM_PRODUCT_NAME)"
