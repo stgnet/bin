@@ -26,6 +26,15 @@ install_tls()
 	ls /etc/asterisk/keys
 }
 
+# TODO: add "FreePBX Compatible" built option:
+#
+# Asterisk 13:
+#   menuselect/menuselect --disable-category MENUSELECT_CORE_SOUNDS --disable-category MENUSELECT_EXTRA_SOUNDS --disable-category MENUSELECT_MOH --enable-category MENUSELECT_ADDONS --enable res_pktccops --enable chan_mgcp --enable chan_motif --enable app_meetme --enable app_page --enable res_snmp --enable res_srtp --enable DONT_OPTIMIZE --disable BUILD_NATIVE --disable res_calendar --disable res_calendar_caldav --disable res_calendar_ews --disable res_calendar_exchange --disable res_calendar_icalendar #
+# Asterisk 12:
+#   menuselect/menuselect --disable-category MENUSELECT_CORE_SOUNDS --disable-category MENUSELECT_EXTRA_SOUNDS --disable-category MENUSELECT_MOH --enable-category MENUSELECT_ADDONS --enable res_pktccops --enable chan_mgcp --enable chan_motif --enable app_dahdibarge --enable app_meetme --enable app_page --enable res_snmp --enable res_srtp --enable DONT_OPTIMIZE --disable BUILD_NATIVE  #
+# Asterisk 11:
+#   menuselect/menuselect --disable-category MENUSELECT_CORE_SOUNDS --disable-category MENUSELECT_EXTRA_SOUNDS --disable-category MENUSELECT_MOH --enable-category MENUSELECT_ADDONS --enable res_pktccops --enable chan_mgcp --enable chan_motif --enable app_dahdibarge --enable app_meetme --enable app_page --enable res_mwi_blf --enable res_snmp --enable res_srtp --enable DONT_OPTIMIZE --disable BUILD_NATIVE --disable res_calendar --disable res_calendar_caldav --disable res_calendar_ews --disable res_calendar_exchange --disable res_calendar_icalendar #
+#
 configure_menuselect()
 {
 	echo "Configuring menuselect options"
