@@ -1,0 +1,65 @@
+#!/bin/bash
+# install digium phone firmware server into avahi
+
+[ `whoami` != 'root' ] && exec sudo env PATH=$PATH $0
+
+install-packages avahi lynx
+
+BASEURL=http://dphone.dl.digium.com/firmware
+
+version_list()
+{
+	lynx -dump $BASEURL/$1 |sed 's/.*http:\/\/.*\/\([0-9]*_[0-9]*_[0-9_]*\)\//\1/;tx;d;:x'
+}
+
+firmware_list()
+{
+	lynx -dump $BASEURL/$1/$2 |sed 's/.*http:\/\/.*\/\([0-9]*_[0-9]*_[0-9_D]*_firmware\.eff\)/\1/;tx;d;:x'
+}
+
+firmware_file_record()
+{
+	while read FILE
+	do
+		MODEL="${FILE#*_D}"
+		MODEL="D${MODEL%_firmware.eff}"
+		echo "        <txt-record>${MODEL}File=$FILE</txt-record>"
+	done
+}
+
+create_service_group()
+{
+	echo '<?xml version="1.0" standalone="no"?>'
+	echo '<!DOCTYPE service-group SYSTEM "avahi-service.dtd">'
+	echo "<service-group>"
+	echo "    <name>$1</name>"
+	echo "    <service>"
+	echo "        <type>_digiumproxy._udp</type>"
+	echo "        <port>80</port>"
+	echo "        <txt-record>firmwareUrl=$BASEURL/$2/$3/</txt-record>"
+	echo "        <txt-record>firmwareVersion=$3</txt-record>"
+# create list of actual fw files here
+	firmware_list $2 $3 | firmware_file_record
+	echo "        <txt-record>serviceType=firmware</txt-record>"
+	echo "    </service>"
+	echo "</service-group>"
+}
+
+create_service_groups()
+{
+	while read VERSION
+	do
+		create_service_group "Digium Phone Firmware $VERSION" $1 $VERSION > /etc/avahi/services/firmware-$VERSION.service
+	done
+}
+
+create_firmware_service_files()
+{
+	version_list 'asterisk' | tail -5 | create_service_groups 'asterisk'
+	version_list 'beta' | create_service_groups 'beta'
+}
+
+create_firmware_service_files
+# > /etc/avahi/services/firmware.service
+rm -f /etc/avahi/services/firmware.service
+
