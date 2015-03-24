@@ -12,7 +12,7 @@
 # If not provided an svn-revsion the latest is used
 
 [ -f /etc/redhat-release ] && [ ! -f /etc/yum.repos.d/epel.repo ] && echo "WARNING: epel required for libjansson" && yum-epel
-install-packages dmidecode subversion gcc-c++/gcc-4.4 ncurses-devel/libncurses-dev libxml2-devel/libxml2-dev make wget openssl-devel/libcurl4-openssl-dev newt-devel/libnewt-dev kernel-devel/ sqlite-devel/libsqlite-dev libuuid-devel/uuid-dev gtk2-devel/libgtk2.0-dev jansson-devel/libjansson-dev binutils-devel/binutils-dev /pkg-config patch avahi-devel
+install-packages dmidecode subversion gcc-c++/gcc-4.4 ncurses-devel/libncurses-dev libxml2-devel/libxml2-dev make wget openssl-devel/libcurl4-openssl-dev newt-devel/libnewt-dev kernel-devel/ sqlite-devel/libsqlite-dev libuuid-devel/uuid-dev gtk2-devel/libgtk2.0-dev jansson-devel/libjansson-dev binutils-devel/binutils-dev /pkg-config patch avahi-devel unixODBC-devel libtool-ltdl-devel libvorbis-devel libogg-devel libcurl-devel openssl-devel iksemel-devel
 [ ! -f /usr/lib/libpjsip.so -a ! -f /usr/lib64/libpjsip.so ] && install-pjsip
 
 install_tls()
