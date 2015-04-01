@@ -4,7 +4,7 @@ set -ex
 
 for CORE in core.*
 do
-	gdb -se "asterisk" -ex "bt full" -ex "thread apply all bt" -batch -c $CORE > backtrace-$CORE 2>backtrace-$CORE-errors
+	gdb -se "asterisk" -ex "bt full" -ex "thread apply all bt" -batch -c $CORE > backtrace-${CORE}.txt 2>backtrace-${CORE}-errors.txt
 	rm $CORE
 	more backtrace-$CORE
 done
