@@ -19,6 +19,8 @@ highlight Spacetab ctermbg=Red
 let matchSpacetab = matchadd("Spacetab",' \+\ze\t',-1)
 highlight Trailing ctermbg=red
 let matchTrailing = matchadd("Trailing",'\s\+\$',-1)
+highlight CommaSpace ctermbg=Yellow
+let matchCommaSpace = matchadd("CommaSpace",',[^ ]',-1)
 ---
 fi
 
