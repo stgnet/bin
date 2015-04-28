@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 # install an arbitrary list of packages
 #
 # for example:
