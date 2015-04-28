@@ -118,7 +118,7 @@ dash_b() # List Asterisk Branches
 
 dash_z() # Use internal repo (digium only)
 {
-	GIT_REPO="http://gerrit.digium.internal/r/asterisk"
+	GIT_REPO="https://gerrit.digium.internal/r/asterisk"
 }
 
 dash_g() # Use github repo (readonly)
@@ -129,6 +129,8 @@ dash_g() # Use github repo (readonly)
 enable_commit_hook()
 {
 	echo "Don't know how to enable commit hook yet"
+	GIT_REPO="https://$USER@gerrit.asterisk.org/asterisk"
+	GIT_COMMIT_HOOK="scp -p -P 29418 $USER@gerrit.asterisk.org:hooks/commit-msg .git/hooks/"
 }
 
 dash_d() # Developer Mode (DONT_OPTIMIZE, BETTER_BACKTRACES, DO_CRASH, TEST_FRAMEWORK, commit hook)
@@ -309,6 +311,11 @@ git_asterisk()
 
 	cd $DEST_PATH
 
+	if [ ! -z "$GIT_COMMIT_HOOK" ]
+	then
+		$GIT_COMMIT_HOOK
+	fi
+
 }
 
 compile_asterisk()
@@ -327,7 +334,7 @@ main()
 	CACHE_DIR="/tmp/build-asterisk-cache"
 	INSTALL="prompt"
 	MENUSELECT="--enable EXTRA-SOUNDS-EN-GSM"
-	GIT_REPO="http://gerrit.asterisk.org/asterisk"
+	GIT_REPO="https://gerrit.asterisk.org/asterisk"
 	BRANCH_PREFIX=""
 
 	check_libdir
