@@ -364,7 +364,13 @@ git_asterisk()
 
 compile_asterisk()
 {
-	make -j$(nproc)
+	if ! make -j$(nproc)
+	then
+		echo -en '\007'
+		# re-run make to show error, which may have already scrolled off screeen
+		make
+		exit 1
+	fi
 }
 
 install_asterisk()
