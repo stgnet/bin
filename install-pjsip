@@ -4,6 +4,8 @@
 [ ! -f /etc/yum.repos.d/epel.repo ] && install-packages epel-release
 install-packages git subversion gcc-c++/gcc-4.4 speex-devel/libspeex-dev libsrtp-devel/ portaudio-devel/
 
+[ -f /usr/local/lib/libpjsip.so -o -f /usr/local/lib64/libpjsip.so ] && echo "ERROR: conflicting pjsip in /usr/local!" && exit 1
+
 set -ex
 
 LIBDIR=/usr/lib
