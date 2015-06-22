@@ -21,6 +21,7 @@ highlight Trailing ctermbg=red
 let matchTrailing = matchadd("Trailing",'\s\+\$',-1)
 highlight CommaSpace ctermbg=Yellow
 let matchCommaSpace = matchadd("CommaSpace",',[^ ]',-1)
+set modeline
 ---
 fi
 
