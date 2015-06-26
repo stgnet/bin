@@ -114,7 +114,7 @@ install_testsuite_dependencies()
 	which sipp > /dev/null || install-sipp
 	which pjsua > /dev/null || install-pjsua
 
-	which asttest || (cd asttest ; make ; sudo make install ; cp /usr/local/bin/asttest /usr/bin)
+	which asttest || (cd asttest ; make ; sudo make install ; sudo cp /usr/local/bin/asttest /usr/bin)
 
 	if [ -z "`pip list |fgrep starpy`" ]
 	then
