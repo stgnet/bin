@@ -4,7 +4,7 @@ WHO="scott@stg.net"
 
 export PATH="/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin:~/bin"
 
-SCRIPT=$(realpath $0)
+SCRIPT=$(readlink -f $0)
 
 option_install()
 {
