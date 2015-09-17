@@ -5,23 +5,5 @@
 [ ! -f /etc/redhat-release ] && echo "ERROR: not a RedHat/Fedora/CentOS system" && exit 1
 [ -f /etc/yum.repos.d/epel.repo ] && echo "Not an error: EPEL is already installed" && exit 0
 
-RHVER="`cat /etc/redhat-release`"
-
-VERSION="${RHVER#* release }"
-VERSION="${VERSION%.*}"
-
-RPM=""
-[ "$VERSION" = "7.0" ] && RPM="e/epel-release-7-5.noarch.rpm" && VERSION="7"
-[ "$VERSION" = "6" ] && RPM="epel-release-6-8.noarch.rpm"
-[ "$VERSION" = "5" ] && RPM="epel-release-5-4.noarch.rpm"
-
-[ -z "$RPM" ] && echo "ERROR: version $VERSION not implemented" && exit 1
-
-PLATFORM="`uname -m`"
-[ "$PLATFORM" = "i686" ] && PLATFORM="x86_64"
-[ "$PLATFORM" = "i586" ] && PLATFORM="i386"
-
-EPEL="http://dl.fedoraproject.org/pub/epel"
-
-yum -y install $EPEL/$VERSION/$PLATFORM/$RPM
+yum -y install epel-release
 
