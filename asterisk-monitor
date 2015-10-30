@@ -1,0 +1,74 @@
+#!/bin/sh
+# monitor asterisk and restart if not running
+WHO="scott@stg.net"
+
+export PATH="/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin:~/bin"
+
+SCRIPT=$(readlink -f $0)
+
+option_install()
+{
+	sudo sed -i -e "\$a* * * * * $USER $SCRIPT monitor" /etc/crontab
+	exit
+}
+
+option_uninstall()
+{
+	SCRIPT=`basename $SCRIPT`
+	sudo sed -i "/$SCRIPT/d" /etc/crontab
+}
+
+option_monitor()
+{
+	if ! asterisk -rx "core show channels" > /tmp/asterisk-channels
+	then
+		echo "ASTERISK IS NOT RUNNING"
+		sleep 30
+		if ! asterisk -rx "core show channels"
+		then
+			echo "SECOND OPINION: STILL NOT RUNNING"
+			option_start
+			exit
+		fi
+	fi
+
+	if ! grep '^0 active channels' /tmp/asterisk-channels > /dev/null
+	then
+		ACTIVE=$(fgrep 'active channels' /tmp/asterisk-channels)
+		#Mail -s "$HOSTNAME ASTERISK: $ACTIVE" $WHO < /tmp/asterisk-channels
+	fi
+
+	if [ $(($(stat -f --format="%a*%S" /))) -lt 1000000000 ]
+	then
+		df |Mail -s "$HOSTNAME: LOW DISK SPACE" $WHO
+	fi
+}
+
+option_start()
+{
+	echo "Running Asterisk"
+	asterisk -fvvvvvdddddgn
+	RC="$?"
+	echo "Asterisk has exited $RC"
+	for CORE in core.*
+	do
+			if [ ! -f $CORE ]
+			then
+				continue
+			fi
+			tail -1000 /var/log/asterisk/full > full-log-${CORE}.txt
+			gdb -se "asterisk" -ex "bt full" -ex "thread apply all bt" -batch -c $CORE > backtrace-${CORE}.txt 2>bt-error-${CORE}.txt
+			rm $CORE
+			(echo "Asterisk died $RC" ;fgrep -v "New LWP" backtrace-${CORE}.txt | head -100 ; echo "Continued in attachment") |mutt -a backtrace-${CORE}.txt -a full-log-${CORE}.txt -s "$HOSTNAME ASTERISK CORE ${CORE}" -- $WHO
+	done
+}
+
+if ! fgrep "$SCRIPT monitor" /etc/crontab > /dev/null
+then
+	option_install
+fi
+
+OPT="$1"
+shift
+option_$OPT $*
+
