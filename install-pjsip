@@ -11,14 +11,15 @@ set -ex
 LIBDIR=/usr/lib
 [ `uname -m` = "x86_64" ] && [ -d /usr/lib64 ] && LIBDIR="/usr/lib64"
 
-if [ "$1" = "-a" ]
+if true #[ "$1" = "-a" ]
 then
 	echo "Installing PJSIP from Asterisk Github"
 	[ -d pjproject ] && rm -rf pjproject
 	git clone https://github.com/asterisk/pjproject pjproject
 	cd pjproject
+	git checkout tags/pjproject-2.3-patched
 	echo "#define PJ_HAS_IPV6 1" >pjlib/include/pj/config_site.h
-	./configure --enable-shared --prefix=/usr --libdir=$LIBDIR --with-external-pa --with-external-gsm --disable-sound --disable-resample --disable-video --disable-opencore-amr
+	./configure CFLAGS='-g' --enable-shared --prefix=/usr --libdir=$LIBDIR --with-external-pa --with-external-gsm --disable-sound --disable-resample --disable-video --disable-opencore-amr
 	make dep
 	make
 	sudo make install
@@ -32,11 +33,11 @@ svn co http://svn.pjsip.org/repos/pjproject/trunk pjsip-r$REVNUM
 cd pjsip-r$REVNUM
 echo "#define PJ_HAS_IPV6 1" >pjlib/include/pj/config_site.h
 
-./configure --enable-shared --prefix=/usr --libdir=$LIBDIR --with-external-srtp --with-external-speex --with-external-pa --disable-resample 
-make dep 
-make 
+./configure --enable-shared --prefix=/usr --libdir=$LIBDIR --with-external-srtp --with-external-speex --with-external-pa --disable-resample
+make dep
+make
 #make -C pjsip-apps/build pjsua
-sudo make install 
+sudo make install
 sudo ldconfig
 
 #sudo cp -v pjsip-apps/bin/pjsua-`uname -m`-*-linux-gnu /usr/sbin/pjsua
