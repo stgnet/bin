@@ -1,15 +1,16 @@
 #!/bin/sh
-# Install FreePBX - version 2
+# Install FreePBX - version 3
 
 set -ex
 
+LIBDIR="/usr/lib"
+if [ `uname -m` = "x86_64" -a -d /usr/lib64 ]
+then
+	LIBDIR="/usr/lib64"
+fi
+
 # this all has to be run as root
 [ `whoami` != 'root' ] && exec sudo $0
-
-cd /usr/src
-
-# install asterisk if not already
-which asterisk || build-asterisk -i 11
 
 # disable selinux
 if [ -z "`sestatus |grep 'status: *disabled'`" ]
@@ -22,147 +23,129 @@ fi
 # erase any previous configuration
 rm -f /etc/amportal.conf
 
+# update system
 yum -y update
 yum -y groupinstall core
 yum -y groupinstall base
 
-yum -y install automake gcc gcc-c++ ncurses-devel openssl-devel libxml2-devel unixODBC-devel libcurl-devel libogg-devel libvorbis-devel speex-devel spandsp-devel freetds-devel net-snmp-devel iksemel-devel corosynclib-devel newt-devel popt-devel libtool-ltdl-devel lua-devel sqlite-devel radiusclient-ng-devel portaudio-devel libresample-devel neon-devel libical-devel openldap-devel gmime-devel mysql-devel bluez-libs-devel jack-audio-connection-kit-devel gsm-devel libedit-devel libuuid-devel jansson-devel libsrtp-devel subversion git subversion libxslt-devel kernel-devel audiofile-devel gtk2-devel libtiff-devel libtermcap-devel bison php php-mysql php-process php-pear php-mbstring php-xml php-gd tftp-server httpd sox tzdata mysql-connector-odbc mysql-server fail2ban
+yum install gcc gcc-c++ lynx bison mysql-devel mysql-server php php-mysql php-pear php-mbstring tftp-server httpd make ncurses-devel libtermcap-devel sendmail sendmail-cf caching-nameserver sox newt-devel libxml2-devel libtiff-devel audiofile-devel gtk2-devel subversion kernel-devel git subversion kernel-devel php-process crontabs cronie cronie-anacron wget vim php-xml uuid-devel libtool sqlite-devel
+
+#yum -y install automake gcc gcc-c++ ncurses-devel openssl-devel libxml2-devel unixODBC-devel libcurl-devel libogg-devel libvorbis-devel speex-devel spandsp-devel freetds-devel net-snmp-devel iksemel-devel corosynclib-devel newt-devel popt-devel libtool-ltdl-devel lua-devel sqlite-devel radiusclient-ng-devel portaudio-devel libresample-devel neon-devel libical-devel openldap-devel gmime-devel mysql-devel bluez-libs-devel jack-audio-connection-kit-devel gsm-devel libedit-devel libuuid-devel jansson-devel libsrtp-devel subversion git subversion libxslt-devel kernel-devel audiofile-devel gtk2-devel libtiff-devel libtermcap-devel bison php php-mysql php-process php-pear php-mbstring php-xml php-gd tftp-server httpd sox tzdata mysql-connector-odbc mysql-server fail2ban
 
 # disable firewall
 service iptables save
 service iptables stop
 chkconfig iptables off
 
-#wget http://www.pjsip.org/release/2.3/pjproject-2.3.tar.bz2
-#tar -xjvf pjproject*
-#ARCH=$(getconf LONG_BIT | grep "64")
-#./configure --prefix=/usr --libdir=/usr/lib${ARCH} --enable-shared --disable-sound --disable-resample --disable-video --disable-opencore-amr CFLAGS='-O2 -DNDEBUG'
-#make uninstall && make dep && make && make install && ldconfig
-
-#cd /usr/src
-#wget http://downloads.asterisk.org/pub/telephony/asterisk/asterisk-13-current.tar.gz
-#tar zxvf asterisk-13-current.tar.gz
-#cd /usr/src/asterisk-13*/
-#make distclean
-#ARCH=$(getconf LONG_BIT | grep "64")
-#./configure --libdir=/usr/lib${ARCH}
-
-
-#To select compile options manually from gui menu run "make menuselect" instead of the following commands.
-#To list command line options type menuselect/menuselect --list-options
-#If Asterisk fails to run on a virtual machine try add "--disable BUILD_NATIVE"
-#To add asterisk realtime for applications such as A2billing add "--enable res_config_mysql"
-
-#?make menuselect.makeopts
-#menuselect/menuselect --enable cdr_mysql --enable EXTRA-SOUNDS-EN-GSM menuselect.makeopts
-
-grep '^asterisk:' /etc/passwd > /dev/null || adduser asterisk -M -d /var/lib/asterisk -s /sbin/nologin -c "Asterisk User"
-make && make install
-
-pear install db-1.7.14 || echo "Ignoring error from already installed package"
-VERSION=12.0
-USERNAME=asteriskuser
-PASSWORD=amp109
-
-service mysqld start
-
-cd /usr/src
-rm -rf freepbx
-git clone -b release/$VERSION https://github.com/FreePBX/framework.git freepbx
-
-chown -R asterisk. /var/run/asterisk
-chown -R asterisk. /etc/asterisk
-chown -R asterisk. /var/lib/asterisk
-chown -R asterisk. /var/{lib,log,spool}/asterisk
-chown -R asterisk. /var/www
-
-cd /usr/src/freepbx
-
-mysqladmin -f drop asterisk || echo "Ignoring that"
-mysqladmin -f drop asteriskcdrdb || echo "Ignoring that"
-mysqladmin create asterisk
-mysqladmin create asteriskcdrdb
-mysql -u root asterisk < SQL/newinstall.sql
-mysql -u root asteriskcdrdb < SQL/cdr_mysql_table.sql
-mysql -e "GRANT ALL PRIVILEGES ON asterisk.* TO $USERNAME@localhost IDENTIFIED BY '$PASSWORD';"
-mysql -e "GRANT ALL PRIVILEGES ON asteriskcdrdb.* TO $USERNAME@localhost IDENTIFIED BY '$PASSWORD';"
-mysql -e "flush privileges;"
-
-./start_asterisk start
-[ -d /var/www/html ] && mv /var/www/html /var/www/html_orig
-./install_amp --scripted --installdb --dbhost localhost --username $USERNAME --password $PASSWORD --force-overwrite --cleaninstall
-#?# Press ENTER for all the questions including the incorrect IP address.
-#Do not be concerned by all the warning messages.
-
-# Minimal module install
-amportal a ma upgrade framework
-amportal a ma upgrade core
-amportal a ma upgrade voicemail
-amportal a ma upgrade sipsettings
-amportal a ma upgrade infoservices
-amportal a ma upgrade featurecodeadmin
-amportal a ma upgrade logfiles
-amportal a ma upgrade callrecording
-amportal a ma upgrade cdr
-amportal a ma upgrade dashboard
-
-# Optionally install all standard modules
-amportal a ma upgrade manager
-amportal a ma installall
-amportal restart
-amportal a reload
-amportal chown
-#If the GUI complains about problems with the framework module or a missing /usr/sbin/amportal file try amportal a ma delete framework followed by amportal a ma upgrade framework.
-
-#Setting a mysql root password is recommended.  
-
-#MYSQL_ROOT_PW=abcdef
-#mysqladmin -u root password "$MYSQL_ROOT_PW"
-
-sed -i "s/User apache/User asterisk/" /etc/httpd/conf/httpd.conf
-sed -i "s/Group apache/Group asterisk/" /etc/httpd/conf/httpd.conf
-Enable .htaccess files to protect sensitive webserver directories.
-
-sed -i ':a;N;$!ba;s/AllowOverride None/AllowOverride All/2' /etc/httpd/conf/httpd.conf
-
-#Prevent external MySQL access.
-sed -i "2i bind-address=127.0.0.1" /etc/my.cnf
+# enable mysql
+service mysqld start || echo "Mysql already running?"
 chkconfig mysqld on
+
+# enable apache
+service httpd start || echo "Httpd already running?"
 chkconfig httpd on
 
-#Change “upload_max_filesize” from default 2M to 20M to allow larger music on hold files.
-sed -i 's/upload_max_filesize = .*/upload_max_filesize = 20M/' /etc/php.ini
+# install peardb
+pear channel-update pear.php.net
+pear install db-1.7.14 || echo "Peardb already installed?"
 
-echo /usr/local/sbin/amportal start >> /etc/rc.local
+# add asterisk user
+adduser asterisk -M -c "Asterisk user" || echo "Asterisk user already created?"
 
-
-#yum -y install tftp-server
-#nano /etc/xinetd.d/tftp
-#change
-# server_args = -s /var/lib/tftpboot
-#to
-#server_args = -s /tftpboot
-#
-#change
-#disable=yes
-#to
-#disable=no
-#
-#mkdir /tftpboot
-#chmod 777 /tftpboot
-#service xinetd restart
-
+# install pjproject
 cd /usr/src
-wget http://sourceforge.net/projects/mpg123/files/mpg123/1.21.0/mpg123-1.21.0.tar.bz2
-tar -xjvf mpg123*
+rm -rf pjproject-*
+wget http://www.pjsip.org/release/2.2.1/pjproject-2.2.1.tar.bz2
+tar -xjvf pjproject-2.2.1.tar.bz2
+cd pjproject-2.2.1
+CFLAGS='-DPJ_HAS_IPV6=1' ./configure --prefix=/usr --enable-shared --disable-sound\
+  --disable-resample --disable-video --disable-opencore-amr --libdir=$LIBDIR
+make dep
+make
+make install
 
-cd mpg123*/
-ARCH=$(getconf LONG_BIT | grep "64")
-./configure --prefix=/usr --libdir=/usr/lib${ARCH} && make && make install && ldconfig
-Digum addons
+# install libjansson
+cd /usr/src
+rm -rf jansson
+git clone https://github.com/akheron/jansson.git
+cd jansson
+autoreconf -i
+./configure --libdir=$LIBDIR
+make
+make install
+
+# install asterisk
+cd /usr/src
+rm -rf asterisk*
+wget http://downloads.asterisk.org/pub/telephony/asterisk/asterisk-13-current.tar.gz
+tar xvfz asterisk-13-current.tar.gz
+rm -f asterisk-13-current.tar.gz
+cd asterisk-*
+contrib/scripts/install_prereq install || echo "Ignoring"
+./configure --libdir=$LIBDIR
+contrib/scripts/get_mp3_source.sh
+#make menuselect
+make menuselect.makeopts
+menuselect/menuselect --enable cdr_mysql --enable EXTRA-SOUNDS-EN-GSM menuselect.makeopts
+make
+make install
+make config
+ldconfig
+
+# install extra sounds
+mkdir -p /var/lib/asterisk/sounds || echo "sounds directory already exists?"
+cd /var/lib/asterisk/sounds
+wget http://downloads.asterisk.org/pub/telephony/sounds/asterisk-extra-sounds-en-wav-current.tar.gz
+tar xfz asterisk-extra-sounds-en-wav-current.tar.gz
+rm -f asterisk-extra-sounds-en-wav-current.tar.gz
+# Wideband Audio download 
+wget http://downloads.asterisk.org/pub/telephony/sounds/asterisk-extra-sounds-en-g722-current.tar.gz
+tar xfz asterisk-extra-sounds-en-g722-current.tar.gz
+rm -f asterisk-extra-sounds-en-g722-current.tar.gz
 
 
-#cd /usr/src
-#wget http://downloads.digium.com/pub/register/linux/register
-#chmod +x register
-#./register
+
+# download freepbx
+cd /usr/src
+wget http://mirror.freepbx.org/modules/packages/freepbx/freepbx-12.0-latest.tgz
+tar vxfz freepbx-12.0-latest.tgz
+
+# set ownership
+chown asterisk. /var/run/asterisk
+chown -R asterisk. /etc/asterisk
+chown -R asterisk. /var/{lib,log,spool}/asterisk
+chown -R asterisk. /usr/lib*/asterisk
+mkdir /var/www/html || echo "Already exists"
+chown -R asterisk. /var/www/
+
+# modifications to apache
+sed -i 's/\(^upload_max_filesize = \).*/\120M/' /etc/php.ini
+cp /etc/httpd/conf/httpd.conf /etc/httpd/conf/httpd.conf_orig
+sed -i 's/^\(User\|Group\).*/\1 asterisk/' /etc/httpd/conf/httpd.conf
+service httpd restart
+
+
+# configure mysql
+cd /usr/src/freepbx
+export ASTERISK_DB_PW=amp109
+#mysqladmin -f drop asterisk || echo "Ignoring that"
+#mysqladmin -f drop asteriskcdrdb || echo "Ignoring that"
+mysqladmin -u root create asterisk 
+mysqladmin -u root create asteriskcdrdb 
+mysql -u root -e "GRANT ALL PRIVILEGES ON asterisk.* TO asteriskuser@localhost IDENTIFIED BY '${ASTERISK_DB_PW}';"
+mysql -u root -e "GRANT ALL PRIVILEGES ON asteriskcdrdb.* TO asteriskuser@localhost IDENTIFIED BY '${ASTERISK_DB_PW}';"
+mysql -u root -e "flush privileges;"
+
+# install freepbx
+cd /usr/src/freepbx
+./start_asterisk start
+./install_amp --installdb --username=asteriskuser --password=${ASTERISK_DB_PW}
+amportal chown
+amportal a ma installall
+amportal a reload
+amportal a ma refreshsignatures
+amportal chown
+
+# fix moh and restart
+ln -s /var/lib/asterisk/moh /var/lib/asterisk/mohmp3
+amportal restart
