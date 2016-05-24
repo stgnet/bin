@@ -23,6 +23,7 @@ WEBROOT="/var/www"
 DEFAULT="/var/www/html"
 CONFDIR="/etc/httpd/conf.d"
 
+which letsencrypt >/dev/null || yum -y install letsencrypt
 
 [ ! -f /usr/sbin/httpd ] && yum -y install httpd
 [ ! -f /usr/bin/php ] && yum -y install php
@@ -138,6 +139,20 @@ do
 	[ -f $WEBROOT/$DOMAIN.directives ] && DIRECTORY="$DIRECTORY	`cat $WEBROOT/$DOMAIN.directives`
 "
 
+	SSL=""
+	if [ ! -d /etc/letsencrypt/live/$DOMAIN ]
+	then
+		certbot certonly --webroot -w $DOCROOT -d $DOMAIN,www.$DOMAIN
+	fi
+	if [ -d /etc/letsencrypt/live/$DOMAIN ]
+	then
+		SSL="$SSL	SSLEngine on
+	SSLCertificateFile /etc/letsencrypt/live/$DOMAIN/cert.pem
+	SSLCertificateKeyFile /etc/letsencrypt/live/$DOMAIN/privkey.pem
+	SSLCertificateChainFile /etc/letsencrypt/live/$DOMAIN/chain.pem
+"
+	fi
+
 	cat <<---- >>$CONFDIR/virtual.conf
 #
 # $DOMAIN => $DOCROOT
@@ -151,6 +166,7 @@ do
 	DocumentRoot $DOCROOT
 	ServerName $DOMAIN
 	ServerAlias www.$DOMAIN
+$SSL
 $VIRTUAL
 	<Directory $DOCROOT>
 		Order deny,allow
