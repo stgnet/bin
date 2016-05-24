@@ -1,0 +1,3 @@
+#!/bin/bash -ex
+
+ssh root@$1 "cd /etc/vmware ; cp .#license.cfg license.cfg ; /etc/init.d/vpxa restart"
