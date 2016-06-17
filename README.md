@@ -48,6 +48,6 @@ LICENSE
 Public Domain - why? Becuase you should be free to do whatever you want with these.
 
 * Please share, fork, and contribute improvements
-* If you don't like this, let me know why: scott@griepentrog.com or @stgnet
-* If you like this, please buy me a beer: [GitTip](https://www.gittip.com/stgnet/) or paypal@griepentrog.com
+* If you don't like this, let me know why: scott@stg.net or @stgnet
+* If you like this, please buy me a beer: [GitTip](https://gratipay.com/~stgnet/) or paypal@stg.net
 
