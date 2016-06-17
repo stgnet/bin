@@ -49,5 +49,5 @@ Public Domain - why? Becuase you should be free to do whatever you want with the
 
 * Please share, fork, and contribute improvements
 * If you don't like this, let me know why: scott@stg.net or @stgnet
-* If you like this, please buy me a beer: [GitTip](https://gratipay.com/~stgnet/) or paypal@stg.net
+* If you like this, please buy me a beer: [Gratipay](https://gratipay.com/~stgnet/) or paypal@stg.net
 
