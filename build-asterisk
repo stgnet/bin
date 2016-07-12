@@ -173,6 +173,12 @@ dash_d() # Developer Mode (DONT_OPTIMIZE, BETTER_BACKTRACES, DO_CRASH, TEST_FRAM
 	enable_menuselect TEST_FRAMEWORK
 }
 
+dash_o() # "optimal" mode (DONT_OPTIMIZE, BETTER_BACKTRACES)
+{
+	enable_menuselect DONT_OPTIMIZE
+	enable_menuselect BETTER_BACKTRACES
+}
+
 dash_ref() # Enable REF_DEBUG
 {
 	enable_menuselect REF_DEBUG
@@ -207,7 +213,7 @@ do_test()
 
 check_asterisk()
 {
-	if [ -f Makefile && -f ./configure ]
+	if [ -f Makefile ]
 	then
 		MAKEFILE=$(head -2 Makefile | fgrep Asterisk)
 		if [ ! -z "$MAKEFILE" ]
