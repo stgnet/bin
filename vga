@@ -1,12 +1,26 @@
 #!/bin/bash
 # run asterisk under valgrind
 set -ex
-cp /dev/null /var/log/asterisk/full
+#cp /dev/null /var/log/asterisk/full
 
 OPTS="--log-file=/tmp/vg.log --num-callers=50 --error-limit=no --suppressions=$HOME/bin/asterisk.supp --leak-check=full"
-OPTS="$OPTS --gen-suppressions=all"
+if  [ "$1" = "-g" ]
+then
+	shift
+	OPTS="$OPTS --gen-suppressions=all"
+else
+	SUP_FILE="${0%/*}/asterisk.supp"
+	if [ -f "$SUP_FILE" ]
+	then
+		OPTS="$OPTS --suppressions=$SUP_FILE"
+	fi
+fi
 
-# (sleep 2 ; xterm -e 'gdb asterisk -ex "target remote |/usr/bin/vgdb" -ex "handle SIG32 nostop noprint" -ex "handle SIGHUP nostop ignore" -ex "continue" ' )&
-# OPTS="$OPTS -vgdb=yes -vgdb-error=0"
+if [ "$1" = "-d" ]
+then
+	shift
+	(sleep 2 ; xterm -e 'gdb asterisk -ex "target remote |/usr/bin/vgdb" -ex "handle SIG32 nostop noprint" -ex "handle SIGHUP nostop ignore" -ex "continue" ' )&
+	OPTS="$OPTS --vgdb=yes --vgdb-error=0"
+fi
 
 valgrind $OPTS asterisk -vnc
