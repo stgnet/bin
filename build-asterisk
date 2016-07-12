@@ -55,22 +55,6 @@ install_tls()
 # Asterisk 11:
 #   menuselect/menuselect --disable-category MENUSELECT_CORE_SOUNDS --disable-category MENUSELECT_EXTRA_SOUNDS --disable-category MENUSELECT_MOH --enable-category MENUSELECT_ADDONS --enable res_pktccops --enable chan_mgcp --enable chan_motif --enable app_dahdibarge --enable app_meetme --enable app_page --enable res_mwi_blf --enable res_snmp --enable res_srtp --enable DONT_OPTIMIZE --disable BUILD_NATIVE --disable res_calendar --disable res_calendar_caldav --disable res_calendar_ews --disable res_calendar_exchange --disable res_calendar_icalendar #
 #
-NOT_USED_configure_menuselect()
-{
-	echo "Configuring menuselect options"
-	make menuselect.makeopts
-
-	BUILD_NATIVE=""
-	SYSTEM_PRODUCT_NAME="`cat /sys/devices/virtual/dmi/id/product_name`"
-	[ "$SYSTEM_PRODUCT_NAME" = "" ] && BUILD_NATIVE="--disable BUILD_NATIVE"
-	[ "$SYSTEM_PRODUCT_NAME" = "VMware Virtual Platform" ] && BUILD_NATIVE="--disable BUILD_NATIVE"
-	[ ! -z "$BUILD_NATIVE" ] && echo "WARNING: BUILD NATIVE DISABLED ($SYSTEM_PRODUCT_NAME)"
-
-	REF_DEBUG=""
-	# REF_DEBUG="--enable REF_DEBUG"
-	menuselect/menuselect $REF_DEBUG $BUILD_NATIVE --enable DONT_OPTIMIZE --enable TEST_FRAMEWORK --enable DO_CRASH --enable BETTER_BACKTRACES --enable EXTRA-SOUNDS-EN-GSM menuselect.makeopts
-}
-
 check_libdir()
 {
 	LIBDIR="/usr/lib"
@@ -83,7 +67,7 @@ check_libdir()
 check_virtual()
 {
 	# in virtualized environments, native build can result in illegal instructions
-	SYSTEM_PRODUCT_NAME="`cat /sys/devices/virtual/dmi/id/product_name`"
+	SYSTEM_PRODUCT_NAME=$(cat /sys/devices/virtual/dmi/id/product_name || echo "")
 	if [ "$SYSTEM_PRODUCT_NAME" = "" ]
 	then
 		# to be safe, disable if unknown
