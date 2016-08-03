@@ -1,0 +1,39 @@
+#!/bin/bash
+# reset git tag for this branch (assuming need to delete from origin)
+set -ex
+
+if [ -z "$1" ]
+then
+	echo "use: reset_tag (tag)"
+	exit 1
+fi
+
+if ! git diff-index --quiet --cached HEAD
+then
+	echo "error: uncommitted changes"
+	exit 1
+fi
+if ! git diff-files --quiet
+then
+	echo "error: modified files"
+	exit 1
+fi
+
+CURRENT=$(git describe --tags)
+
+if [ "$CURRENT" = "$1" ]
+then
+	echo "error: already at tag $1"
+	exit 1
+fi
+
+if [[ "$CURRENT" =~ "$1" ]]
+then
+
+	# reset the remote tag
+	git push origin :refs/tags/$1
+	git tag -f $1
+	git push origin --tags
+else
+	echo "error: You are at $CURRENT"
+fi
