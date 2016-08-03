@@ -1,5 +1,76 @@
 # VALGRIND SUPPRESSIONS FOR ASTERISK
 
+# codec speex
+{
+   speex-uninit-1
+   Memcheck:Cond
+   fun:speex_decode_int
+   fun:speextolin_framein
+   fun:framein
+   fun:generate_computational_cost
+   fun:__ast_register_translator
+   fun:load_module
+   fun:start_resource
+   fun:load_resource_list
+   fun:load_modules
+   fun:asterisk_daemon
+   fun:main
+}
+{
+   speex-uninit-2
+   Memcheck:Cond
+   fun:speex_decode_int
+   fun:speextolin_framein
+   fun:framein
+   fun:generate_computational_cost
+   fun:__ast_register_translator
+   fun:load_module
+   fun:start_resource
+   fun:load_resource_list
+   fun:load_modules
+   fun:asterisk_daemon
+   fun:main
+}
+
+
+# pjsip
+{
+   pjsip-memcpy-overlap
+   Memcheck:Overlap
+   fun:memcpy@@GLIBC_2.14
+   fun:pj_memcpy
+   fun:pj_sockaddr_copy_addr
+   fun:pj_gethostip
+   fun:load_pjsip
+   fun:load_module
+   fun:start_resource
+   fun:load_resource_list
+   fun:load_modules
+   fun:asterisk_daemon
+   fun:main
+}
+
+# sorcery uninit
+{
+   sorcery-uninit-1
+   Memcheck:Cond
+   fun:ast_variable_lists_match
+   fun:sorcery_config_fields_cmp
+   fun:internal_ao2_traverse
+   fun:__ao2_callback
+   fun:sorcery_config_retrieve_multiple
+   fun:ast_sorcery_retrieve_by_fields
+   fun:update_all_unqualified_endpoints
+   fun:ast_res_pjsip_init_options_handling
+   fun:load_module
+   fun:start_resource
+   fun:load_resource_list
+   fun:load_modules
+   fun:asterisk_daemon
+   fun:main
+}
+
+
 #
 # _dl_close errors
 #
@@ -29,24 +100,6 @@
    fun:...
 }
 
-
-#
-# codec_speex
-#
-{
-   speex
-   Memcheck:Cond
-   fun:speex_decode_int
-   fun:speextolin_framein
-   fun:framein
-   fun:generate_computational_cost
-   fun:__ast_register_translator
-   fun:load_module
-   fun:start_resource
-   fun:load_resource_list
-   fun:load_modules
-   fun:main
-}
 
 {
    strcasecmp-context-destroy
