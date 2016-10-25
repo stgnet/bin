@@ -1,0 +1,12 @@
+#!/bin/bash
+# use tshark to monitor RTCP packets
+
+[ `whoami` != 'root' ] && exec sudo env PATH=$PATH $0 $@
+
+if [ -z "$1" ]
+then
+	INTERFACE=''
+else
+	INTERFACE=" -i $1 "
+fi
+tshark $INTERFACE -pl 'udp[8:1]==0x81' -o rtcp.heuristic_rtcp:TRUE -R rtcp -T fields -e ip.dst -e ip.src -e rtcp.ssrc.fraction -e rtcp.ssrc.jitter -e rtcp.senderssrc
