@@ -9,4 +9,4 @@ then
 else
 	INTERFACE=" -i $1 "
 fi
-tshark $INTERFACE -pl 'udp[8:1]==0x81' -o rtcp.heuristic_rtcp:TRUE -R rtcp -T fields -e ip.dst -e ip.src -e rtcp.ssrc.fraction -e rtcp.ssrc.jitter -e rtcp.senderssrc
+tshark $INTERFACE -pl 'udp[8:1]==0x81' -o rtcp.heuristic_rtcp:TRUE -R rtcp -T fields -E header=y -e ip.dst -e ip.src -e rtcp.ssrc.fraction -e rtcp.ssrc.jitter -e rtcp.senderssrc 2>/dev/null
