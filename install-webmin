@@ -1,0 +1,22 @@
+#!/bin/bash
+# install webmin
+
+[ `whoami` != 'root' ] && exec sudo env PATH=$PATH $0 $@
+
+cat <<---- > /etc/yum.repos.d/webmin.repo
+[Webmin]
+name=Webmin Distribution Neutral
+#baseurl=http://download.webmin.com/download/yum
+mirrorlist=http://download.webmin.com/download/yum/mirrorlist
+enabled=1
+---
+
+rpm --import http://www.webmin.com/jcameron-key.asc
+yum -y install webmin
+chkconfig webmin on
+service webmin start
+
+firewall-cmd --permanent --zone=public --add-port=10000/tcp
+firewall-cmd --permanent --zone=public --add-service=https
+firewall-cmd --permanent --zone=public --add-service=http
+firewall-cmd --reload
