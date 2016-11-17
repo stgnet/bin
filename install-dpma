@@ -1,0 +1,46 @@
+#!/bin/sh
+# install res_digium_phone (DPMA) module
+
+[ `whoami` != 'root' ] && exec sudo $0
+
+# determine asterisk version
+
+AST_VER="`asterisk -V`"
+[ $? -ne 0 ] && echo "ERROR: Is Asterisk installed?" && exit 1
+[ -z "$AST_VER" ] && echo "ERROR: Unable go get Asterisk version" && exit 1
+
+NUMB=${AST_VER#Asterisk }
+VERSION=${NUMB%.*}
+
+if [ "${VERSION:0:3}" = "GIT" ]
+then
+	VERSION="${VERSION#GIT-}"
+	VERSION="${VERSION%-*}"
+fi
+
+echo "Asterisk version: $VERSION"
+
+# determine bit-ed-ness
+
+case "$(uname -m)" in
+	x86_64) PLATFORM="x86_64" ;;
+	i386) PLATFORM="x86_32" ;;
+	i686) PLATFORM="x86_32" ;;
+	*) echo "ERROR: platform is not supported" && exit 1 ;;
+esac
+
+LIBDIR="/usr/lib"
+if [ "$PLATFORM" = "x86_64" -a -d /usr/lib64 ]
+then
+	LIBDIR="/usr/lib64"
+fi
+
+echo "Platform: $PLATFORM"
+
+PLATPATH="$(echo $PLATFORM | tr '_' '-')"
+
+URL="http://downloads.digium.com/pub/telephony/res_digium_phone/asterisk-$VERSION.0/$PLATPATH/res_digium_phone-$VERSION.0_current-$PLATFORM.tar.gz"
+
+echo "Downloading $URL"
+
+wget -qO - $URL | tar xvfz - --directory=$LIBDIR/asterisk/modules res*/*.so --strip-components=1
