@@ -49,7 +49,8 @@ firewall-cmd --reload || echo "Warning: firewall not restarted"
 # enable and start mysql
 systemctl enable mariadb.service
 systemctl start mariadb
-echo "The prompt will ask you for your current root password. Since you just installed MySQL, you most likely won’t have one, so leave it blank by pressing enter. Then the prompt will ask you if you want to set a root password. Do not set a root password. We secure the database automatically, as part of the install script.  Apart from that you can chose yes for the rest. This will remove some sample users and databases, disable remote root logins, and load these new rules so that MySQL immediately respects the changes we have made."
+# echo "The prompt will ask you for your current root password. Since you just installed MySQL, you most likely won’t have one, so leave it blank by pressing enter. Then the prompt will ask you if you want to set a root password. Do not set a root password. We secure the database automatically, as part of the install script.  Apart from that you can chose yes for the rest. This will remove some sample users and databases, disable remote root logins, and load these new rules so that MySQL immediately respects the changes we have made."
+# not doing: mysql_seure_installation
 
 # enable and start apache
 systemctl enable httpd.service
@@ -97,7 +98,7 @@ contrib/scripts/install_prereq install
 ./configure --libdir=/usr/lib64
 contrib/scripts/get_mp3_source.sh
 make menuselect.makeopts
-#menuselect/menuselect --enable cdr_mysql --enable EXTRA-SOUNDS-EN-GSM menuselect.makeopts
+menuselect/menuselect --enable cdr_mysql --enable EXTRA-SOUNDS-EN-GSM menuselect.makeopts
 make
 make install
 make config
@@ -142,21 +143,3 @@ cd freepbx
 ./start_asterisk start
 ./install -n
 
-# install freepbx service
-cat <<---- >/etc/systemd/system/freepbx.service
-[Unit]
-Description=FreePBX VoIP Server
-After=mariadb.service
-
-[Service]
-Type=oneshot
-RemainAfterExit=yes
-ExecStart=/usr/sbin/fwconsole start
-ExecStop=/usr/sbin/fwconsole stop
-
-[Install]
-WantedBy=multi-user.target
----
-
-systemctl enable freepbx.service
-systemctl start freepbx
