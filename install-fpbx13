@@ -12,18 +12,21 @@ fi
 # this all has to be run as root
 [ `whoami` != 'root' ] && exec sudo $0
 
-# disable selinux
-if [ -z "`sestatus |grep 'status: *disabled'`" ]
+# disable selinux (if installed)
+if which sestatus
 then
-	echo "Disabling selinux..."
-	sed -i 's/SELINUX=.*/SELINUX=disabled/' /etc/sysconfig/selinux
-	sed -i 's/SELINUX=.*/SELINUX=disabled/' /etc/selinux/config
-fi
+	if [ -z "`sestatus |grep 'status: *disabled'`" ]
+	then
+		echo "Disabling selinux..."
+		sed -i 's/SELINUX=.*/SELINUX=disabled/' /etc/sysconfig/selinux
+		sed -i 's/SELINUX=.*/SELINUX=disabled/' /etc/selinux/config
+	fi
 
-if [ -z "`sestatus |grep 'status: *disabled'`" ]
-then
-	echo "Reboot and restart this script"
+	if [ -z "`sestatus |grep 'status: *disabled'`" ]
+	then
+		echo "Reboot and restart this script"
 	exit 1
+	fi
 fi
 
 # erase any previous configuration
