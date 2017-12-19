@@ -1,0 +1,206 @@
+#!/bin/sh
+# Upgrade FreePBX to SNG7
+
+set -ex
+
+if ! which fwconsole >/dev/null
+then
+	echo "Error: is FreePBX installed?"
+	exit 1
+fi
+
+[ `whoami` != 'root' ] && exec sudo $0
+
+mkdir /root/previous-yum.repos.d
+mv  /etc/yum.repos.d/* /root/previous-yum.repos.d
+
+cat >/etc/yum.repos.d/CentOS-Sources.repo <<::::::::::::::
+# CentOS-Sources.repo
+#
+# The mirror system uses the connecting IP address of the client and the
+# update status of each mirror to pick mirrors that are updated to and
+# geographically close to the client.  You should use this for CentOS updates
+# unless you are manually picking other mirrors.
+#
+# If the mirrorlist= does not work for you, as a fall back you can try the 
+# remarked out baseurl= line instead.
+#
+#
+
+[centos-base-source]
+name=CentOS-$releasever - Base Sources
+baseurl=http://vault.centos.org/centos/$releasever/os/Source/
+gpgcheck=1
+enabled=0
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
+
+#released updates 
+[centos-updates-source]
+name=CentOS-$releasever - Updates Sources
+baseurl=http://vault.centos.org/centos/$releasever/updates/Source/
+gpgcheck=1
+enabled=0
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
+
+#additional packages that may be useful
+[centos-extras-source]
+name=CentOS-$releasever - Extras Sources
+baseurl=http://vault.centos.org/centos/$releasever/extras/Source/
+gpgcheck=1
+enabled=0
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
+
+#additional packages that extend functionality of existing packages
+[centos-centosplus-source]
+name=CentOS-$releasever - Plus Sources
+baseurl=http://vault.centos.org/centos/$releasever/centosplus/Source/
+gpgcheck=1
+enabled=0
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
+::::::::::::::
+
+cat >/etc/yum.repos.d/Sangoma-Base.repo <<::::::::::::::
+# This is the standard Sangoma Yum Repository
+
+[sng-base]
+name=Sangoma-$releasever - Base
+mirrorlist=http://mirrorlist.sangoma.net/?release=$releasever&arch=$basearch&repo=os&dist=$dist
+#baseurl=http:/package1.sangoma.net/sng7/$releasever/os/$basearch/
+gpgcheck=0
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-Sangoma-7
+
+[sng-updates]
+name=Sangoma-$releasever - Updates
+mirrorlist=http://mirrorlist.sangoma.net/?release=$releasever&arch=$basearch&repo=updates&dist=$dist
+#baseurl=http://package1.sangoma.net/sng7/$releasever/updates/$basearch/
+gpgcheck=0
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-Sangoma-7
+
+[sng-extras]
+name=Sangoma-$releasever - Extras
+mirrorlist=http://mirrorlist.sangoma.net/?release=$releasever&arch=$basearch&repo=extras&dist=$dist
+#baseurl=http://package1.sangoma.net/sng7/$releasever/extras/$basearch/
+gpgcheck=0
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-Sangoma-7
+
+[sng-pkgs]
+name=Sangoma-$releasever - Sangoma Open Source Packages
+mirrorlist=http://mirrorlist.sangoma.net/?release=$releasever&arch=$basearch&repo=sng7&dist=$dist
+#baseurl=http://package1.sangoma.net/sng7/$releasever/sng7/$basearch/
+gpgcheck=0
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-Sangoma-7
+
+[sng-epel]
+name=Sangoma-$releasever - Sangoma Epel mirror
+mirrorlist=http://mirrorlist.sangoma.net/?release=$releasever&arch=$basearch&repo=epel&dist=$dist
+#baseurl=http://package1.sangoma.net/sng7/$releasever/epel/$basearch/
+gpgcheck=0
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7
+
+::::::::::::::
+
+cat >/etc/yum.repos.d/Sangoma-Commercial.repo <<::::::::::::::
+[sng-commercial]
+name=Sangoma-$releasever - Commercial Modules
+mirrorlist=http://mirrorlist.sangoma.net/?release=$releasever&arch=$basearch&repo=commercial&dist=$dist
+#baseurl=http:/package1.sangoma.net/sng7/$releasever/commercial/$basearch/
+gpgcheck=0
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-Sangoma-7
+enabled=0
+::::::::::::::
+
+cat >/etc/yum.repos.d/Sangoma-CR.repo <<::::::::::::::
+# Sangoma-CR.repo
+#
+# The Continuous Release ( CR )  repository contains rpms that are due in the next
+# release for a specific Sangoma Linux Version ( eg. next release in Sangoma-7 );
+# these rpms are far less tested, with no integration checking or update path
+# testing having taken place. They are still built from the upstream sources, but
+# might not map to an exact upstream distro release.
+#
+# These packages are made available soon after they are built, for people willing 
+# to test their environments, provide feedback on content for the next release, and
+# for people looking for early-access to next release content.
+#
+# The CR repo is shipped in a disabled state by default; its important that users 
+# understand the implications of turning this on. 
+#
+# NOTE: We do not use a mirrorlist for the CR repos, to ensure content is available
+#       to everyone as soon as possible, and not need to wait for the external
+#       mirror network to seed first. However, many local mirrors will carry CR repos
+#       and if desired you can use one of these local mirrors by editing the baseurl
+#       line in the repo config below.
+#
+
+[sng-cr]
+name=Sangoma-$releasever - cr
+baseurl=http://package1.sangoma.net/sng7/$releasever/cr/$basearch/
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
+enabled=0
+::::::::::::::
+
+cat >/etc/yum.repos.d/Sangoma-fasttrack.repo <<::::::::::::::
+[fasttrack]
+name=Sangoma-7 - fasttrack
+mirrorlist=http://mirrorlist.sangoma.net/?release=$releasever&arch=$basearch&repo=fasttrack&dist=$dist
+#baseurl=http:/package1.sangoma.net/sng7/$releasever/fasttrack/$basearch/
+gpgcheck=1
+enabled=0
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
+
+::::::::::::::
+
+cat >/etc/yum.repos.d/Sangoma-Media.repo <<::::::::::::::
+# Sangoma-Media.repo
+#
+#  This repo can be used with mounted DVD media, verify the mount point for
+#  Sangoma-7.  You can use this repo and yum to install items directly off the
+#  DVD ISO that we release.
+#
+# To use this repo, put in your DVD and use it with the other repos too:
+#  yum --enablerepo=sng7-media [command]
+#  
+# or for ONLY the media repo, do this:
+#
+#  yum --disablerepo=\* --enablerepo=sng7-media [command]
+
+[sng7-media]
+name=Sangoma-$releasever - Media
+baseurl=file:///media/Sangoma/
+        file:///media/cdrom/
+        file:///media/cdrecorder/
+gpgcheck=0
+enabled=0
+
+::::::::::::::
+
+cat >/etc/yum.repos.d/Sangoma-Sources.repo <<::::::::::::::
+# Source RPM Repositories
+
+[sng-src]
+name=SRPMs for Sanoma specific packages
+baseurl=http://package1.sangoma.net/src
+gpgcheck=0
+enabled=0
+
+[sng-src-os]
+name=SRPMs for Sanoma OS
+baseurl=http://package1.sangoma.net/sng7/src/os
+gpgcheck=0
+enabled=0
+
+[sng-src-updates]
+name=SRPMs for Sanoma Updates
+baseurl=http://package1.sangoma.net/sng7/src/updates
+gpgcheck=0
+enabled=0
+
+[sng-src-epel]
+name=SRPMs for Epel Packages
+baseurl=http://package1.sangoma.net/sng7/src/epel
+gpgcheck=0
+enabled=0
+
+::::::::::::::
+
