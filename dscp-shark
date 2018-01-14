@@ -1,0 +1,2 @@
+# monitor DCSCP values including indicators of sip and rtp traffic
+tshark -T fields -e ip.dst -e ip.src -e ip.dsfield.dscp -e sip.Call-ID -e rtp.ssrc $@
