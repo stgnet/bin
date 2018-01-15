@@ -33,8 +33,8 @@ fi
 rm -f /etc/amportal.conf
 
 # update system
-yum -y update yum
-yum -y update
+#yum -y update yum
+#yum -y update
 yum -y groupinstall core base "Development Tools"
 yum -y install epel-release
 
@@ -45,14 +45,45 @@ yum -y install lynx tftp-server unixODBC mysql-connector-odbc mariadb-server mar
   libuuid-devel
 
 # Install php 5.6 repositories
-rpm -Uvh https://mirror.webtatic.com/yum/el7/webtatic-release.rpm || echo "Already installed?"
+#rpm -Uvh https://mirror.webtatic.com/yum/el7/webtatic-release.rpm || echo "Already installed?"
+
+# install selected sng7 repos
+
+cat >/etc/yum.repos.d/Sangoma-Commercial.repo <<'::::::::::::::'
+[sng-commercial]
+name=Sangoma-$releasever - Commercial Modules
+mirrorlist=http://mirrorlist.sangoma.net/?release=$releasever&arch=$basearch&repo=commercial&dist=$dist
+#baseurl=http:/package1.sangoma.net/sng7/$releasever/commercial/$basearch/
+gpgcheck=0
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-Sangoma-7
+enabled=0
+::::::::::::::
+
+# this is just the sng-pkgs repo (not the entire base) to get the zend-guard-loader
+cat >/etc/yum.repos.d/Sangoma-Packages.repo <<'::::::::::::::'
+[sng-pkgs]
+name=Sangoma-$releasever - Sangoma Open Source Packages
+mirrorlist=http://mirrorlist.sangoma.net/?release=$releasever&arch=$basearch&repo=sng7&dist=$dist
+#baseurl=http://package1.sangoma.net/sng7/$releasever/sng7/$basearch/
+gpgcheck=0
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-Sangoma-7
+::::::::::::::
+
+# yum clean all to clean out yum cache so it will find new RPMs
+yum clean all
+
+yum -y install php56w php56w-pdo php56w-mysql php56w-mbstring php56w-pear php56w-process php56w-xml  php56w-ldap php56w-intl php56w-soap
+
+# yum install needed RPMs for Commercial Modules
+yum -y install zend-guard-loader sysadmin fail2ban incron ImageMagick
 
 # add asterisk user
 adduser asterisk -m -c "Asterisk user" || echo "Asterisk user already created?"
 
 # Install php5.6w
 yum -y remove php*
-yum -y install php56w php56w-pdo php56w-mysql php56w-mbstring php56w-pear php56w-process php56w-xml php56w-opcache php56w-ldap php56w-intl php56w-soap
+yum -y install php56w php56w-pdo php56w-mysql php56w-mbstring php56w-pear php56w-process php56w-xml php56w-ldap php56w-intl php56w-soap
+#php56w-opcache 
 
 # Install nodejs
 curl -sL https://rpm.nodesource.com/setup_8.x | bash -
@@ -143,3 +174,12 @@ rm -f freepbx-14.0-latest.tgz
 cd freepbx
 ./start_asterisk start
 ./install -n
+
+# Ensure you have the right mirror servers to be able to download and obtain commercial modules
+/var/lib/asterisk/bin/freepbx_setting MODULE_REPO http://mirror1.freepbx.org,http://mirror2.freepbx.org
+
+# install sysadmin
+fwconsole ma enablerepo commercial
+fwconsole ma download sysadmin
+fwconsole ma install sysadmin
+
