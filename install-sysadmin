@@ -47,4 +47,6 @@ yum -y install zend-guard-loader sysadmin fail2ban incron ImageMagick
 /var/lib/asterisk/bin/freepbx_setting MODULE_REPO http://mirror1.freepbx.org,http://mirror2.freepbx.org
 
 # install sysadmin
+fwconsole ma enablerepo commercial
+fwconsole ma download sysadmin
 fwconsole ma install sysadmin
