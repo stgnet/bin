@@ -33,9 +33,16 @@ fi
 rm -f /etc/amportal.conf
 
 # update system
-#yum -y update yum
-#yum -y update
-yum -y groupinstall core base "Development Tools"
+yum -y update yum
+yum -y update
+
+# yum -y groupinstall core base "Development Tools"
+# group core will update the kernel, which can bork some vms
+# instead, just install a few necessities
+yum -y install jansson ethtool logrotate which man-db e2fsprogs postfix sudo
+
+yum -y groupinstall base "Development Tools"
+
 yum -y install epel-release
 
 yum -y install lynx tftp-server unixODBC mysql-connector-odbc mariadb-server mariadb \
