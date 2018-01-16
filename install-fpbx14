@@ -36,8 +36,8 @@ fi
 rm -f /etc/amportal.conf
 
 # update system
-yum -y update yum
-yum -y update
+#yum -y update yum
+#yum -y update
 
 # yum -y groupinstall core base "Development Tools"
 # group core will update the kernel, which can bork some vms
