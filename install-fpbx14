@@ -12,6 +12,9 @@ fi
 # this all has to be run as root
 [ `whoami` != 'root' ] && exec sudo $0
 
+# add asterisk user
+adduser asterisk -m -c "Asterisk user" || echo "Asterisk user already created?"
+
 # disable selinux (if installed)
 if which sestatus
 then
@@ -83,9 +86,6 @@ yum -y install php56w php56w-pdo php56w-mysql php56w-mbstring php56w-pear php56w
 
 # yum install needed RPMs for Commercial Modules
 yum -y install zend-guard-loader sysadmin fail2ban incron ImageMagick
-
-# add asterisk user
-adduser asterisk -m -c "Asterisk user" || echo "Asterisk user already created?"
 
 # Install php5.6w
 yum -y remove php*
