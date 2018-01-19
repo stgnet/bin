@@ -1,0 +1,21 @@
+#/bin/sh
+# install key on remote server for no-password login
+
+SERVER="$1"
+[ -z "$SERVER" ] && echo -n "Enter server or user@server: " && read SERVER
+USER="${SERVER%@*}"
+[ "$USER" = "$SERVER" ] && USER="root"
+SERVER="${SERVER#*@}"
+[ -z "$USER" ] && USER=`whoami`
+
+# generate our local key
+[ ! -d ~/.ssh ] && mkdir -p ~/.ssh
+[ ! -f ~/.ssh/id_dsa.pub ] && ssh-keygen -t dsa -P '' -f ~/.ssh/id_dsa
+
+KEYHOLDER=$(cut -d ' ' -f 3 ~/.ssh/id_dsa.pub)
+
+echo "Installing key on $USER@$SERVER..."
+ssh $USER@$SERVER "mkdir -p ~/.ssh;[ -f ~/.ssh/authorized_keys ] && sed -i "/$KEYHOLDER/d" ~/.ssh/authorized_keys;cat >>~/.ssh/authorized_keys; chmod 644 ~/.ssh/authorized_keys" <~/.ssh/id_dsa.pub
+echo "Copying additional files..."
+tar cvf - -C ~  bin .gitconfig .ssh/id_dsa .ssh/id_dsa.pub |ssh $USER@$SERVER "tar xf -"
+
