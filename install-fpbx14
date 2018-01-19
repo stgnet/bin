@@ -1,0 +1,192 @@
+#!/bin/sh
+# Install FreePBX 13 on CentOS 7
+
+set -ex
+
+LIBDIR="/usr/lib"
+if [ `uname -m` = "x86_64" -a -d /usr/lib64 ]
+then
+	LIBDIR="/usr/lib64"
+fi
+
+# this all has to be run as root
+[ `whoami` != 'root' ] && exec sudo $0
+
+# add asterisk user
+adduser asterisk -m -c "Asterisk user" || echo "Asterisk user already created?"
+
+# disable selinux (if installed)
+if which sestatus
+then
+	if [ -z "`sestatus |grep 'status: *disabled'`" ]
+	then
+		echo "Disabling selinux..."
+		sed -i 's/SELINUX=.*/SELINUX=disabled/' /etc/sysconfig/selinux
+		sed -i 's/SELINUX=.*/SELINUX=disabled/' /etc/selinux/config
+	fi
+
+	if [ -z "`sestatus |grep 'status: *disabled'`" ]
+	then
+		echo "Reboot and restart this script"
+	exit 1
+	fi
+fi
+
+# erase any previous configuration
+rm -f /etc/amportal.conf
+
+# update system
+#yum -y update yum
+#yum -y update
+
+# yum -y groupinstall core base "Development Tools"
+# group core will update the kernel, which can bork some vms
+# instead, just install a few necessities
+yum -y install jansson ethtool logrotate which man-db e2fsprogs postfix sudo
+
+yum -y groupinstall base "Development Tools"
+
+yum -y install epel-release
+
+yum -y install lynx tftp-server unixODBC mysql-connector-odbc mariadb-server mariadb \
+  httpd ncurses-devel sendmail sendmail-cf sox newt-devel libxml2-devel libtiff-devel \
+  audiofile-devel gtk2-devel subversion kernel-devel git crontabs cronie \
+  cronie-anacron wget vim uuid-devel sqlite-devel net-tools gnutls-devel python-devel texinfo \
+  libuuid-devel
+
+# Install php 5.6 repositories
+#rpm -Uvh https://mirror.webtatic.com/yum/el7/webtatic-release.rpm || echo "Already installed?"
+
+# install selected sng7 repos
+
+cat >/etc/yum.repos.d/Sangoma-Commercial.repo <<'::::::::::::::'
+[sng-commercial]
+name=Sangoma-$releasever - Commercial Modules
+mirrorlist=http://mirrorlist.sangoma.net/?release=$releasever&arch=$basearch&repo=commercial&dist=$dist
+#baseurl=http:/package1.sangoma.net/sng7/$releasever/commercial/$basearch/
+gpgcheck=0
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-Sangoma-7
+enabled=0
+::::::::::::::
+
+# this is just the sng-pkgs repo (not the entire base) to get the zend-guard-loader
+cat >/etc/yum.repos.d/Sangoma-Packages.repo <<'::::::::::::::'
+[sng-pkgs]
+name=Sangoma-$releasever - Sangoma Open Source Packages
+mirrorlist=http://mirrorlist.sangoma.net/?release=$releasever&arch=$basearch&repo=sng7&dist=$dist
+#baseurl=http://package1.sangoma.net/sng7/$releasever/sng7/$basearch/
+gpgcheck=0
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-Sangoma-7
+::::::::::::::
+
+# yum clean all to clean out yum cache so it will find new RPMs
+yum clean all
+
+yum -y install php56w php56w-pdo php56w-mysql php56w-mbstring php56w-pear php56w-process php56w-xml  php56w-ldap php56w-intl php56w-soap
+
+# yum install needed RPMs for Commercial Modules
+yum -y install zend-guard-loader sysadmin fail2ban incron ImageMagick
+
+# Install php5.6w
+yum -y remove php*
+yum -y install php56w php56w-pdo php56w-mysql php56w-mbstring php56w-pear php56w-process php56w-xml php56w-ldap php56w-intl php56w-soap
+#php56w-opcache 
+
+# Install nodejs
+curl -sL https://rpm.nodesource.com/setup_8.x | bash -
+yum install -y nodejs
+
+# install legacy pear requirements
+pear install Console_Getopt || echo "Pear Console_Getopt may already be installed"
+
+# configure firewall
+firewall-cmd --zone=public --add-port=80/tcp --permanent || echo "Warning: firewall not set"
+firewall-cmd --reload || echo "Warning: firewall not restarted"
+
+# enable and start mysql
+systemctl enable mariadb.service
+systemctl start mariadb
+# echo "The prompt will ask you for your current root password. Since you just installed MySQL, you most likely won’t have one, so leave it blank by pressing enter. Then the prompt will ask you if you want to set a root password. Do not set a root password. We secure the database automatically, as part of the install script.  Apart from that you can chose yes for the rest. This will remove some sample users and databases, disable remote root logins, and load these new rules so that MySQL immediately respects the changes we have made."
+# not doing: mysql_seure_installation
+
+# enable and start apache
+systemctl enable httpd.service
+systemctl start httpd.service
+
+
+# get source code
+cd /usr/src
+wget http://downloads.asterisk.org/pub/telephony/dahdi-linux-complete/dahdi-linux-complete-current.tar.gz
+wget http://downloads.asterisk.org/pub/telephony/libpri/libpri-current.tar.gz
+wget http://downloads.asterisk.org/pub/telephony/asterisk/asterisk-14-current.tar.gz
+wget -O jansson.tar.gz https://github.com/akheron/jansson/archive/v2.10.tar.gz
+
+# Compile and Install jansson
+cd /usr/src
+tar vxfz jansson.tar.gz
+rm -f jansson.tar.gz
+cd jansson-*
+autoreconf -i
+./configure --libdir=/usr/lib64
+make
+make install
+
+# install asterisk
+
+# cd /usr/src
+# tar xvfz asterisk-14-current.tar.gz
+# rm -f asterisk-14-current.tar.gz
+# cd asterisk-*
+# contrib/scripts/install_prereq install
+# ./configure --libdir=/usr/lib64 --with-pjproject-bundled
+# contrib/scripts/get_mp3_source.sh
+# make menuselect
+
+cd /usr/src
+rm -rf asterisk*
+wget http://downloads.asterisk.org/pub/telephony/asterisk/asterisk-13-current.tar.gz
+tar xvfz asterisk-13-current.tar.gz
+rm -f asterisk-13-current.tar.gz
+cd asterisk-*
+contrib/scripts/install_prereq install
+./configure --libdir=/usr/lib64 --with-pjproject-bundled
+contrib/scripts/get_mp3_source.sh
+make menuselect.makeopts
+menuselect/menuselect --enable cdr_mysql --enable EXTRA-SOUNDS-EN-GSM menuselect.makeopts
+make
+make install
+make config
+ldconfig
+chkconfig asterisk off
+
+# Set Asterisk ownership permissions.
+chown asterisk. /var/run/asterisk
+chown -R asterisk. /etc/asterisk
+chown -R asterisk. /var/{lib,log,spool}/asterisk
+chown -R asterisk. /usr/lib64/asterisk
+chown -R asterisk. /var/www/
+
+# Install and Configure FreePBX
+# A few small modifications to Apache.
+sed -i 's/\(^upload_max_filesize = \).*/\120M/' /etc/php.ini
+sed -i 's/^\(User\|Group\).*/\1 asterisk/' /etc/httpd/conf/httpd.conf
+sed -i 's/AllowOverride None/AllowOverride All/' /etc/httpd/conf/httpd.conf
+systemctl restart httpd.service
+
+# Download and install FreePBX.
+cd /usr/src
+wget http://mirror.freepbx.org/modules/packages/freepbx/freepbx-14.0-latest.tgz
+tar xfz freepbx-14.0-latest.tgz
+rm -f freepbx-14.0-latest.tgz
+cd freepbx
+./start_asterisk start
+./install -n
+
+# Ensure you have the right mirror servers to be able to download and obtain commercial modules
+/var/lib/asterisk/bin/freepbx_setting MODULE_REPO http://mirror1.freepbx.org,http://mirror2.freepbx.org
+
+# install sysadmin
+fwconsole ma enablerepo commercial
+fwconsole ma download sysadmin
+fwconsole ma install sysadmin
+

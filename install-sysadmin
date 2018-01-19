@@ -1,0 +1,52 @@
+#!/bin/sh
+# Install requiremnets for sysadmin module on FreePBX 14
+
+set -ex
+
+# this all has to be run as root
+[ `whoami` != 'root' ] && exec sudo $0
+
+# remove the webtatic repos
+rm -rf /etc/yum.repos.d/webtatic*
+
+# remove the webtatic packages
+yum -y erase php-common
+
+# Enable the FreePBX Commercial yum repos
+# wget -P /etc/yum.repos.d/ -N http://yum.schmoozecom.net/schmooze-commercial/schmooze-commercial.repo
+cat >/etc/yum.repos.d/Sangoma-Commercial.repo <<'::::::::::::::'
+[sng-commercial]
+name=Sangoma-$releasever - Commercial Modules
+mirrorlist=http://mirrorlist.sangoma.net/?release=$releasever&arch=$basearch&repo=commercial&dist=$dist
+#baseurl=http:/package1.sangoma.net/sng7/$releasever/commercial/$basearch/
+gpgcheck=0
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-Sangoma-7
+enabled=0
+::::::::::::::
+
+# this is just the sng-pkgs repo (not the entire base) to get the zend-guard-loader
+cat >/etc/yum.repos.d/Sangoma-Packages.repo <<'::::::::::::::'
+[sng-pkgs]
+name=Sangoma-$releasever - Sangoma Open Source Packages
+mirrorlist=http://mirrorlist.sangoma.net/?release=$releasever&arch=$basearch&repo=sng7&dist=$dist
+#baseurl=http://package1.sangoma.net/sng7/$releasever/sng7/$basearch/
+gpgcheck=0
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-Sangoma-7
+::::::::::::::
+
+# yum clean all to clean out yum cache so it will find new RPMs
+yum clean all
+
+# reinstall the needed php packages from sng7 instead of webtatic
+yum -y install php56w php56w-pdo php56w-mysql php56w-mbstring php56w-pear php56w-process php56w-xml  php56w-ldap php56w-intl php56w-soap
+
+# yum install needed RPMs for Commercial Modules
+yum -y install zend-guard-loader sysadmin fail2ban incron ImageMagick
+
+# Ensure you have the right mirror servers to be able to download and obtain commercial modules
+/var/lib/asterisk/bin/freepbx_setting MODULE_REPO http://mirror1.freepbx.org,http://mirror2.freepbx.org
+
+# install sysadmin
+fwconsole ma enablerepo commercial
+fwconsole ma download sysadmin
+fwconsole ma install sysadmin
