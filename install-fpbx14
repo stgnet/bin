@@ -1,5 +1,5 @@
 #!/bin/sh
-# Install FreePBX 13 on CentOS 7
+# Install FreePBX 14 on CentOS 7
 
 set -ex
 
@@ -36,13 +36,13 @@ fi
 rm -f /etc/amportal.conf
 
 # update system
-#yum -y update yum
-#yum -y update
+yum -y update yum
+yum -y update
+yum -y groupinstall core base "Development Tools"
 
-# yum -y groupinstall core base "Development Tools"
 # group core will update the kernel, which can bork some vms
 # instead, just install a few necessities
-yum -y install jansson ethtool logrotate which man-db e2fsprogs postfix sudo
+#yum -y install jansson ethtool logrotate which man-db e2fsprogs postfix sudo
 
 yum -y groupinstall base "Development Tools"
 
