@@ -84,13 +84,13 @@ yum clean all
 
 yum -y install php56w php56w-pdo php56w-mysql php56w-mbstring php56w-pear php56w-process php56w-xml  php56w-ldap php56w-intl php56w-soap
 
-# yum install needed RPMs for Commercial Modules
-yum -y install zend-guard-loader sysadmin fail2ban incron ImageMagick
-
 # Install php5.6w
 yum -y remove php*
 yum -y install php56w php56w-pdo php56w-mysql php56w-mbstring php56w-pear php56w-process php56w-xml php56w-ldap php56w-intl php56w-soap
 #php56w-opcache 
+
+# yum install needed RPMs for Commercial Modules
+yum -y install zend-guard-loader sysadmin fail2ban incron ImageMagick
 
 # Install nodejs
 curl -sL https://rpm.nodesource.com/setup_8.x | bash -
