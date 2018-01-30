@@ -241,6 +241,10 @@ SSLCryptoDevice builtin
 </VirtualHost>
 ::::::::::::::
 
+mkdir -p /var/www/html/restapi
+mkdir -p /var/www/html/restapps
+mkdir -p /tftpboot
+
 # enable and start apache
 systemctl enable httpd.service
 systemctl start httpd.service
