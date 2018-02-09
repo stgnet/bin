@@ -240,6 +240,19 @@ SSLCryptoDevice builtin
           "%t %h %{SSL_PROTOCOL}x %{SSL_CIPHER}x \"%r\" %b"
 </VirtualHost>
 ::::::::::::::
+cat >/etc/httpd/conf.d/schmoozecom.conf <<'::::::::::::::'
+Listen 80
+<VirtualHost *:80>
+  Alias /.well-known /var/www/html/.well-known
+  Alias /.freepbx-known /var/www/html/.freepbx-known
+  RewriteEngine on
+  RewriteRule ^/\.(well-known|freepbx-known)/ - [H=text/plain,L]
+  RewriteRule (^\.|/\.) - [F]
+  RewriteRule /restapps/.+/.+ - [F]
+  RewriteRule /restapi/.+/.+ - [F]
+  DocumentRoot /var/www/html
+</VirtualHost>
+::::::::::::::
 
 mkdir -p /var/www/html/restapi
 mkdir -p /var/www/html/restapps
@@ -322,6 +335,7 @@ cd freepbx
 /var/lib/asterisk/bin/freepbx_setting MODULE_REPO http://mirror1.freepbx.org,http://mirror2.freepbx.org
 
 # install sysadmin
+mkdir -p /etc/sangoma /etc/schmooze
 fwconsole ma enablerepo commercial
 fwconsole ma download sysadmin
 fwconsole ma install sysadmin
