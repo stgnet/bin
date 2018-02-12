@@ -44,3 +44,10 @@ fi
 
 # make sure various lints are installed
 sudo pip install flake8
+
+if ! fgrep 'alias vi=vim' ~/.bashrc
+then
+	echo 'alias vi=vim' >> ~/.bashrc
+	echo 'export EDITOR=vim' >> ~/.bashrc
+	echo 'export VISUAL=vim' >> ~/.bashrc
+fi
