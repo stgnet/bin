@@ -23,6 +23,7 @@ WEBROOT="/var/www"
 DEFAULT="/var/www/html"
 CONFDIR="/etc/httpd/conf.d"
 
+which which > /dev/null || yum -y install which
 which letsencrypt >/dev/null || yum -y install letsencrypt
 
 [ ! -f /usr/sbin/httpd ] && yum -y install httpd
