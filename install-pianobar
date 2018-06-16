@@ -1,0 +1,28 @@
+#!/bin/bash
+# Install or update pianobar and it's configuration
+set -e
+
+install-packages pianobar
+
+echo -n "Enter user: " ; read USER
+echo -n "Enter pass: " ; read PASS
+
+TLS=$(openssl s_client -connect tuner.pandora.com:443 < /dev/null 2> /dev/null | openssl x509 -noout -fingerprint | tr -d ':' | cut -d'=' -f2)
+
+cat <<---- >~/pianobar.cfg
+#control_proxy = http://<proxy_user>:<proxy_pass>@<proxy_address>:<proxy_port>
+autoselect = 1
+tls_fingerprint = $TLS
+user = $USER
+password = $PASS
+# Messages with colors using terminal escape codes
+format_nowplaying_song = "[92m%t[0m" by "[96m%a[0m" on "[93m%l[0m"[91m%r[0m%@%s
+format_nowplaying_station = Station "[95m%n[0m" [90m(%i)[0m
+format_list_song = %i) %a - [92m%t[0m%r
+format_msg_info = [97m(i) [0m%s
+format_msg_nowplaying = [36m|>[0m  %s
+format_msg_time = [90m#   [97m%s[0m
+format_msg_err = [90m/!\[0m %s
+format_msg_question = [97m[?][0m %s
+format_msg_debug = [90m%s[0m
+---
