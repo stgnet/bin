@@ -13,8 +13,9 @@ fi
 FILE="/swap.${SIZE}g"
 
 set -ex
-dd if=/dev/zero of=$FILE bs=1024 count=$(expr 2 '*' 1024 '*' 1024)
+dd if=/dev/zero of=$FILE bs=1024 count=$(expr ${SIZE} '*' 1024 '*' 1024)
 chmod 0600 $FILE
 mkswap $FILE
 swapon $FILE
 echo "$FILE swap swap default 0 0" >> /etc/fstab
+swapon -s
