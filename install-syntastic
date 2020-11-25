@@ -3,7 +3,7 @@
 set -ex
 
 # pip package is in epel on rhel based systems
-[ -f /etc/redhat-release -a ! -f /etc/yum.repos.d/epel.repo ] && yum-epel
+#[ -f /etc/redhat-release -a ! -f /etc/yum.repos.d/epel.repo ] && yum-epel
 
 install-packages vim wget python-pip wget
 
@@ -11,6 +11,10 @@ install-packages vim wget python-pip wget
 if ! fgrep 'highlight Tabs' ~/.vimrc > /dev/null
 then
 	cat <<---- >>~/.vimrc
+if &diff
+    syntax off
+endif
+let g:syntastic_python_checkers = ['python3']
 highlight Tabs ctermbg=lightgray
 let matchTabs = matchadd("Tabs","\t",-1)
 highlight Tabspace ctermbg=Magenta

@@ -1,0 +1,14 @@
+#!/bin/bash
+# Install or update vim plugin syntastic
+set -ex
+
+[ `whoami` != 'root' ] && exec sudo env PATH=$PATH $0 $@
+
+# pip package is in epel on rhel based systems
+[ -f /etc/redhat-release -a ! -f /etc/yum.repos.d/epel.repo ] && yum-epel
+
+yum -y groupinstall X11
+yum -y groups install "Xfce"
+
+echo "exec /usr/bin/xfce4-session" >> ~/.xinitrc
+echo "Use 'startx' to begin session"
