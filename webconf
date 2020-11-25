@@ -143,7 +143,7 @@ do
 	SSL=""
 	if [ ! -d /etc/letsencrypt/live/$DOMAIN ]
 	then
-		certbot certonly --webroot -w $DOCROOT -d $DOMAIN,www.$DOMAIN
+		echo -n "scott@stg.net\nA\n" | certbot certonly -n --webroot -w $DOCROOT -d $DOMAIN,www.$DOMAIN
 	fi
 	if [ -d /etc/letsencrypt/live/$DOMAIN ]
 	then
