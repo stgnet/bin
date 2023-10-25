@@ -1,0 +1,27 @@
+#/bin/bash
+
+arraytest[0]='test' || (echo 'ERROR: arrays not supported by bash version'; exit 0)
+
+install-packages unzip php-cli php-curl php-common php-intl php-json php-gd php-mbstring php-mysqli php-soap php-xml php-zip php-imap || exit
+
+echo "SuiteCRM Installation Tool"
+echo ""
+
+DOWNLOAD="https://suitecrm.com/download/142/suite84/563421/suitecrm-8-4-1.zip"
+
+DEST="/var/www/suite"
+
+if [ -d "$DEST" ]
+then
+	echo "Error: $DEST already exists"
+	exit 1
+fi
+
+mkdir -p "$DEST"
+
+cd "$DEST"
+	echo "Downloading..."
+	wget -O suite-install.zip $DOWNLOAD
+	echo "Extracting..."
+	unzip suite-install.zip >/dev/null
+

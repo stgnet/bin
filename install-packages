@@ -24,17 +24,18 @@ then
 	if [ ! -z "$PKGS" ]
 	then
 		sudo yum -y install $PKGS
+		exit $?
 	fi
 else
 	for pkg in $*
 	do
 		deb="${pkg#*/}"
 		[ -z "$deb" ] && continue
-		dpkg-query -s "$deb" >/dev/null || PKGS="$PKGS $deb"
+		dpkg-query -s "$deb" >&/dev/null || PKGS="$PKGS $deb"
 	done
 	if [ ! -z "$PKGS" ]
 	then
 		sudo apt-get -y install $PKGS
+		exit $?
 	fi
 fi
-exit 0

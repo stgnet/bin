@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # auto create virtual config for apache from domains in webroot
 
 # to use:
@@ -19,15 +19,23 @@
 # this really has to be run as root
 [ `whoami` != 'root' ] && exec sudo env PATH=$PATH $0
 
+APACHE="apache2"
+CONFDIR="/etc/apache2/sites-available"
+NOBODY="www-data"
+if [ -f /etc/redhat-release ]
+then
+	APACHE="httpd"
+	CONFDIR="/etc/httpd/conf.d"
+	NOBODY="apache"
+fi
 WEBROOT="/var/www"
 DEFAULT="/var/www/html"
-CONFDIR="/etc/httpd/conf.d"
 
-which which > /dev/null || yum -y install which
-which letsencrypt >/dev/null || yum -y install letsencrypt
+which which > /dev/null || install-packages which
+which letsencrypt >/dev/null || install-packages letsencrypt
 
-[ ! -f /usr/sbin/httpd ] && yum -y install httpd
-[ ! -f /usr/bin/php ] && yum -y install php
+install-packages $APACHE
+install-packages php
 
 [ ! -d "$WEBROOT" ] && echo ERROR: $WEBROOT not found && exit
 [ ! -d "$DEFAULT" ] && echo ERROR: $DEFAULT not found && exit
@@ -66,7 +74,7 @@ do
 	[ ! -d "$DOMAIN" ] && continue
 
 	USER=`ls -ld $DOMAIN |cut -d ' ' -f 3`
-	[ "$USER" == "root" ] && USER='apache'
+	[ "$USER" == "root" ] && USER="$NOBODY"
 
 	VIRTUAL=""
 
@@ -78,7 +86,7 @@ do
 			suPHP_Engine off
 			AddHandler php5-script .php
 			"
-		if [ "$USER" != "apache" ]
+		if [ "$USER" != "$NOBODY" ]
 		then
 			VIRTUAL="
 			suPHP_Engine on
@@ -143,7 +151,7 @@ do
 	SSL=""
 	if [ ! -d /etc/letsencrypt/live/$DOMAIN ]
 	then
-		echo -n "scott@stg.net\nA\n" | certbot certonly -n --webroot -w $DOCROOT -d $DOMAIN,www.$DOMAIN
+		certbot certonly -n --webroot -w $DOCROOT -d $DOMAIN,www.$DOMAIN --agree-tos --email 'scott@stg.net'
 	fi
 	if [ -d /etc/letsencrypt/live/$DOMAIN ]
 	then
@@ -181,4 +189,4 @@ $DIRECTORY
 done
 
 # special restart sequence to insure restart finishes if run FROM httpd
-bash -c 'sleep 3;trap echo SIGTERM;service httpd stop;sleep 1;service httpd start || service httpd status >/dev/tty' >/dev/null  &
+bash -c 'sleep 3;trap echo SIGTERM;service $APACHE stop;sleep 1;service $APACHE start || service $APACHE status >/dev/tty' >/dev/null  &
