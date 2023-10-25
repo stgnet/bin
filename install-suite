@@ -19,6 +19,12 @@ fi
 
 mkdir -p "$DEST"
 
+if [ ! -d "$DEST" ]
+then
+	echo "Error: could not create $DEST"
+	exit 1
+fi
+
 cd "$DEST"
 	echo "Downloading..."
 	wget -O suite-install.zip $DOWNLOAD
