@@ -20,7 +20,7 @@
 [ `whoami` != 'root' ] && exec sudo env PATH=$PATH $0
 
 APACHE="apache2"
-CONFDIR="/etc/apache2/sites-available"
+CONFDIR="/etc/apache2/sites-enabled"
 NOBODY="www-data"
 if [ -f /etc/redhat-release ]
 then
@@ -151,7 +151,7 @@ do
 	SSL=""
 	if [ ! -d /etc/letsencrypt/live/$DOMAIN ]
 	then
-		certbot certonly -n --webroot -w $DOCROOT -d $DOMAIN,www.$DOMAIN --agree-tos --email 'scott@stg.net'
+		certbot certonly -v -n --webroot -w $DOCROOT -d $DOMAIN,www.$DOMAIN --agree-tos --email 'scott@stg.net' || echo "certbot failed"
 	fi
 	if [ -d /etc/letsencrypt/live/$DOMAIN ]
 	then
@@ -187,6 +187,8 @@ $DIRECTORY
 ---
 
 done
+#	cat <$CONFDIR/virtual.conf
 
-# special restart sequence to insure restart finishes if run FROM httpd
-bash -c 'sleep 3;trap echo SIGTERM;service $APACHE stop;sleep 1;service $APACHE start || service $APACHE status >/dev/tty' >/dev/null  &
+## special restart sequence to insure restart finishes if run FROM httpd
+#bash -c 'sleep 3;trap echo SIGTERM;service $APACHE stop;sleep 1;service $APACHE start || service $APACHE status >/dev/tty' >/dev/null  &
+apache2ctl configtest && systemctl restart $APACHE
