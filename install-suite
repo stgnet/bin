@@ -2,7 +2,13 @@
 
 arraytest[0]='test' || (echo 'ERROR: arrays not supported by bash version'; exit 0)
 
-install-packages unzip php-cli php-curl php-common php-intl php-json php-gd php-mbstring php-mysqli php-soap php-xml php-zip php-imap || exit
+install-packages apache2 libapache2-mod-php unzip php php-cli php-curl php-common php-mysql php-imap php-redis php-snmp php-xml php-intl php-json php-gd php-mbstring php-mysqli php-soap php-xml php-zip php-imap mariadb-server || exit
+
+sudo systemctl enable apache2
+sudo systemctl start apache2
+
+sudo systemctl enable mariadb
+sudo systemctl start mariadb
 
 echo "SuiteCRM Installation Tool"
 echo ""
@@ -17,7 +23,7 @@ then
 	exit 1
 fi
 
-mkdir -p "$DEST"
+sudo mkdir -p "$DEST"
 
 if [ ! -d "$DEST" ]
 then
@@ -27,7 +33,10 @@ fi
 
 cd "$DEST"
 	echo "Downloading..."
-	wget -O suite-install.zip $DOWNLOAD
+	wget -O /tmp/suite-install.zip $DOWNLOAD
 	echo "Extracting..."
-	unzip suite-install.zip >/dev/null
+	sudo unzip /tmp/suite-install.zip 
 
+	sudo chown -R www-data:www-data .
+	sudo find . -type d -exec chmod 755 {} \;
+	sudo find . -type f -exec chmod 644 {} \;
