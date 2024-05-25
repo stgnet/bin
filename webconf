@@ -27,6 +27,12 @@ then
 	APACHE="httpd"
 	CONFDIR="/etc/httpd/conf.d"
 	NOBODY="apache"
+else
+	# when running apache2, enable needful
+	if [ ! -f /etc/apache2/mods-enabled/ssl.conf ] then
+		echo "APACHE2: Enabling SSL"
+		a2enmod ssl
+	fi
 fi
 WEBROOT="/var/www"
 DEFAULT="/var/www/html"
