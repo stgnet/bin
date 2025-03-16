@@ -1,8 +1,9 @@
 #/bin/bash
 set -x
 
-SERVER="suite13.stg.net"
-DOWNLOAD="https://suitecrm.com/download/144/suite85/563563/suitecrm-8-5-0.zip"
+SERVER="suite.stg.net"
+#DOWNLOAD="https://suitecrm.com/download/144/suite85/563563/suitecrm-8-5-0.zip"
+DOWNLOAD="https://suitecrm.com/download/165/suite88/565090/suitecrm-8-8-0.zip"
 DEST="/var/www/$SERVER"
 DBNAME=$(echo "$SERVER" |sed 's/\./_/g')
 DBUSER="${DBNAME}_user"
@@ -47,10 +48,10 @@ cd "$DEST"
 	echo "Downloading..."
 	wget -O /tmp/suite-install.zip $DOWNLOAD
 	echo "Extracting..."
-	unzip /tmp/suite-install.zip 
+	unzip /tmp/suite-install.zip  >/tmp/unzip.log
 
-	find . -type d -not -perm 2755 -exec chmod 755 {} \;
-	find . -type f -not -perm 0644 -exec chmod 644 {} \;
+	find . -type d -not -perm 2755 -exec chmod 2755 {} \;
+	find . -type f -not -perm 0644 -exec chmod 0644 {} \;
 	find . ! -user www-data -exec chown www-data:www-data {} \;
 	chmod +x bin/console
 
@@ -76,8 +77,8 @@ cat >/etc/apache2/sites-available/$SERVER.conf <<END
     AllowOverride All
     Require all granted
   </Directory>
-  ErrorLog $LOGDIR/$SERVER_error.log
-  CustomLog $LOGDIR/$SERVER_access.log combined
+  ErrorLog $LOGDIR/${SERVER}_error.log
+  CustomLog $LOGDIR/${SERVER}_access.log combined
 </VirtualHost>
 END
 
@@ -89,6 +90,5 @@ a2dissite 000-default.conf
 apachectl configtest || exit
 systemctl restart apache2
 
-sleep 10 # give it time to reload everything
 
 $DEST/bin/console suitecrm:app:install -u "admin" -p "bogus1234" -U "$DBUSER" -P "$DBPASS" -H "localhost" -N "$DBNAME" -S "http://$SERVER/" -d "yes" -W true
