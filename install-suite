@@ -1,4 +1,21 @@
 #/bin/bash
+set -x
+
+SERVER="suite13.stg.net"
+DOWNLOAD="https://suitecrm.com/download/144/suite85/563563/suitecrm-8-5-0.zip"
+DEST="/var/www/$SERVER"
+DBNAME=$(echo "$SERVER" |sed 's/\./_/g')
+DBUSER="${DBNAME}_user"
+DBPASS="bogus4321"
+
+cat <<END
+SERVER=$SERVER
+DOWNLOAD=$DOWNLOAD
+DEST=$DEST
+DBNAME=$DBNAME
+DBUSER=$DBUSER
+DBPASS=$DBPASS
+END
 
 arraytest[0]='test' || (echo 'ERROR: arrays not supported by bash version'; exit 0)
 
@@ -11,18 +28,6 @@ systemctl start apache2
 
 systemctl enable mariadb
 systemctl start mariadb
-
-echo "SuiteCRM Installation Tool"
-echo ""
-
-SERVER="suite.stg.net"
-DOWNLOAD="https://suitecrm.com/download/144/suite85/563563/suitecrm-8-5-0.zip"
-
-DEST="/var/www/$SERVER"
-
-SQLDB=$(echo "$SERVER" |sed 's/./_/g')
-SQLUSER="$SQLDB_user"
-SQLPASS="bogus4321"
 
 if [ -d "$DEST" ]
 then
@@ -44,16 +49,24 @@ cd "$DEST"
 	echo "Extracting..."
 	unzip /tmp/suite-install.zip 
 
-	find . -type d -not -perm 2755 -exec chmod -v 755 {} \;
-	find . -type f -not -perm 0644 -exec chmod -v 644 {} \;
-	find . ! -user www-data -exec chown -v www-data:www-data {} \;
+	find . -type d -not -perm 2755 -exec chmod 755 {} \;
+	find . -type f -not -perm 0644 -exec chmod 644 {} \;
+	find . ! -user www-data -exec chown www-data:www-data {} \;
 	chmod +x bin/console
 
 
-echo "CREATE DATABASE $SQLDB; CREATE USER '$SQLUSER'@'localhost' IDENTIFIED BY '$SQLPASS'; GRANT ALL PRIVILEGES ON $SQLDB.* TO '$SQLUSER'@'localhost'; FLUSH PRIVILEGES;" | mysql -u root -p || exit
+
+mysql -u root <<END
+CREATE DATABASE $DBNAME;
+CREATE USER '$DBUSER'@'localhost' IDENTIFIED BY '$DBPASS';
+GRANT ALL PRIVILEGES ON $DBNAME.* TO '$DBUSER'@'localhost';
+FLUSH PRIVILEGES;
+END
+
+set -x
 
 
-LOGDIR="${APACHE_LOG_DIR"
+LOGDIR='${APACHE_LOG_DIR}'
 cat >/etc/apache2/sites-available/$SERVER.conf <<END
 <VirtualHost *:80>
   ServerAdmin admin@$SERVER
@@ -76,3 +89,6 @@ a2dissite 000-default.conf
 apachectl configtest || exit
 systemctl restart apache2
 
+sleep 10 # give it time to reload everything
+
+$DEST/bin/console suitecrm:app:install -u "admin" -p "bogus1234" -U "$DBUSER" -P "$DBPASS" -H "localhost" -N "$DBNAME" -S "http://$SERVER/" -d "yes" -W true
