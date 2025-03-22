@@ -73,7 +73,7 @@ cat >/etc/apache2/sites-available/$SERVER.conf <<END
   ServerAdmin admin@$SERVER
   ServerName  $SERVER
   DocumentRoot $DEST/public
-  <Directory $DEST/public>
+  <Directory $DEST>
     AllowOverride All
     Require all granted
   </Directory>
